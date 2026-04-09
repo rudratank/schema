@@ -1,0 +1,94 @@
+﻿<Window x:Class="DbForge.WPF.Views.ConnectionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:helpers="clr-namespace:DbForge.WPF.UI.Helpers"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Connect to Server"
+        Width="400" SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="110"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Server type -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Server type:" VerticalAlignment="Center" Margin="0,0,0,10"/>
+        <ComboBox   Grid.Row="0" Grid.Column="1" Margin="0,0,0,10"
+                    ItemsSource="{Binding AvailableProviders}"
+                    SelectedItem="{Binding SelectedProvider}"/>
+
+        <!-- Server name -->
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Server name:" VerticalAlignment="Center" Margin="0,0,0,10"/>
+        <TextBox    Grid.Row="1" Grid.Column="1" Margin="0,0,0,10"
+                Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!--Authatication type>-->
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Authatication type:" VerticalAlignment="Center" Margin="0,0,0,10"/>
+        <ComboBox Grid.Row="2" Grid.Column="1"
+          Margin="0,0,0,10"
+          ItemsSource="{Binding AvailableAuthTypes}"
+          SelectedValue="{Binding SelectedAuthType}"
+          SelectedValuePath="Value"
+          DisplayMemberPath="Display"/>
+
+
+
+        <!-- Port -->
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Port:" VerticalAlignment="Center" Margin="0,0,0,10"/>
+        <TextBox    Grid.Row="3" Grid.Column="1" Margin="0,0,0,10"
+                    Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- Username -->
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Username:" VerticalAlignment="Center" Margin="0,0,0,10"/>
+        <TextBox    Grid.Row="4" Grid.Column="1" Margin="0,0,0,10"
+                   Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{Binding IsSqlAuthentication}"/>
+
+        <!-- Password — PasswordBox can't bind directly, we handle it in code-behind -->
+        <TextBlock  Grid.Row="5" Grid.Column="0" Text="Password:" VerticalAlignment="Center" Margin="0,0,0,10"/>
+        <PasswordBox Grid.Row="5" Grid.Column="1" Margin="0,0,0,10"
+             IsEnabled="{Binding IsSqlAuthentication}"
+             helpers:PasswordBoxHelper.BindPassword="True"
+             helpers:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay}" />
+
+        <!-- Status strip: shown only when there is a message -->
+        <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="0,0,0,12"
+                Padding="8,6" CornerRadius="4"
+                Visibility="{Binding HasStatus, Converter={StaticResource BoolToVis}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsStatusSuccess}" Value="True">
+                            <Setter Property="Background" Value="#DFF0D8"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsStatusSuccess}" Value="False">
+                            <Setter Property="Background" Value="#F2DEDE"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="12"/>
+        </Border>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2"
+                    Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Test"    Command="{Binding TestCommand}"    Width="80" Margin="0,0,8,0"/>
+            <Button Content="Connect" Command="{Binding ConnectCommand}" Width="80" Margin="0,0,8,0" IsDefault="True"/>
+            <Button Content="Cancel"  Command="{Binding CancelCommand}"  Width="80" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

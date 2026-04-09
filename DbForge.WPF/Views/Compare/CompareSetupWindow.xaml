@@ -1,0 +1,59 @@
+﻿<Window x:Class="DbForge.WPF.Views.Compare.CompareSetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Schema Compare — Setup"
+        Width="860" SizeToContent="Height"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Templates/ConnectionTemplates.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <DockPanel>
+
+        <!-- Footer ──────────────────────────────────────────────────────────── -->
+        <Border DockPanel.Dock="Bottom"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                BorderThickness="0,1,0,0" Padding="12,8">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Compare"
+                        Command="{Binding CompareCommand}"
+                        Width="100" Margin="0,0,8,0"
+                        IsDefault="True"/>
+                <Button Content="Cancel"
+                        Width="80"
+                        IsCancel="True"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Source | VS | Target ───────────────────────────────────────────── -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <ContentPresenter Grid.Column="0"
+                              Content="{Binding Source}"
+                              ContentTemplate="{StaticResource ConnectionSideTemplate}"/>
+
+            <TextBlock Grid.Column="1"
+                       Text="VS"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"
+                       FontSize="16"
+                       Margin="12,0"/>
+
+            <ContentPresenter Grid.Column="2"
+                              Content="{Binding Target}"
+                              ContentTemplate="{StaticResource ConnectionSideTemplate}"/>
+        </Grid>
+
+    </DockPanel>
+</Window>

@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DbForge.Abstractions\DbForge.Abstractions.csproj" />
+		<ProjectReference Include="..\DbForge.Core.Models\DbForge.Core.Models.csproj" />
+		<ProjectReference Include="..\DbForge.Core\DbForge.Core.csproj" />
+		<ProjectReference Include="..\DbForge.Infrastructure\DbForge.Infrastructure.csproj" />
+		<ProjectReference Include="..\DbForge.Providers.SqlServer\DbForge.Providers.SqlServer.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Controls\" />
+		<Folder Include="Converters\" />
+		<Folder Include="ViewModels\TreeNodes\" />
+		<Folder Include="Views\" />
+	</ItemGroup>
+
+</Project>

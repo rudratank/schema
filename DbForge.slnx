@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="DbForge.Abstractions/DbForge.Abstractions.csproj" />
+  <Project Path="DbForge.Core.Models/DbForge.Core.Models.csproj" />
+  <Project Path="DbForge.Core/DbForge.Core.csproj" />
+  <Project Path="DbForge.Infrastructure/DbForge.Infrastructure.csproj" />
+  <Project Path="DbForge.Providers.MySql/DbForge.Providers.MySql.csproj" />
+  <Project Path="DbForge.Providers.SqlServer/DbForge.Providers.SqlServer.csproj" />
+  <Project Path="DbForge.WPF/DbForge.WPF.csproj" Id="72ee1b3b-4039-4ebb-9653-a5027d1670fa" />
+</Solution>
