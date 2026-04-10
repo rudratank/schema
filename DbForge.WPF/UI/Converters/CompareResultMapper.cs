@@ -6,8 +6,11 @@ namespace DbForge.WPF.UI.Converters;
 
 /// <summary>
 /// Turns a CompareResult (+ optional schemas) into a CompareResultViewModel.
-/// Each table becomes one flat row. The schemas are stored on the VM so the
-/// SQL panel can generate DDL when the user selects a row.
+///
+/// KEY FIX: ColumnDiffs is now populated for every row so that UpdateDiffPanel
+/// receives the actual diff items when the user selects a row.  Previously it
+/// was always empty, which caused rename detection to fall through to
+/// "SourceOnly" (red −) instead of "Modified" (amber ~).
 /// </summary>
 public static class CompareResultMapper
 {
@@ -24,12 +27,11 @@ public static class CompareResultMapper
             RemovedCount = result.RemovedCount,
             ModifiedCount = result.ModifiedCount,
             StatusText = $"Compare finished · {result.DiffItems.Count} difference(s) found",
-            // Store schemas so UpdateSqlPanel can do table lookups on selection
             SourceSchema = sourceSchema,
             TargetSchema = targetSchema,
         };
 
-        // ── Tables only in source (will be CREATEd in target) ────────────────
+        // ── Tables only in source (CREATE in target) ───────────────────────
         foreach ( var td in result.Tables.Where(t => t.Status == "Removed") )
         {
             vm.AddRow(new CompareRowViewModel
@@ -44,10 +46,12 @@ public static class CompareResultMapper
                 Status = "OnlyInSource",
                 Operation = "Create",
                 IsChecked = true,
+                // All columns are "removed" diff items for this table
+                ColumnDiffs = DiffItemsForTable(result, td.Name),
             });
         }
 
-        // ── Tables only in target (will be DROPped from target) ───────────────
+        // ── Tables only in target (DROP from target) ───────────────────────
         foreach ( var td in result.Tables.Where(t => t.Status == "Added") )
         {
             vm.AddRow(new CompareRowViewModel
@@ -62,10 +66,11 @@ public static class CompareResultMapper
                 Status = "OnlyInTarget",
                 Operation = "Drop",
                 IsChecked = false,
+                ColumnDiffs = DiffItemsForTable(result, td.Name),
             });
         }
 
-        // ── Tables present in both ────────────────────────────────────────────
+        // ── Tables present in both ─────────────────────────────────────────
         var tablesWithDiffs = result.DiffItems
             .Where(d => d.ParentName != null)
             .Select(d => d.ParentName!)
@@ -73,6 +78,7 @@ public static class CompareResultMapper
 
         foreach ( var td in result.Tables.Where(t => t.Status != "Added" && t.Status != "Removed") )
         {
+            var colDiffs = DiffItemsForTable(result, td.Name);
             var hasDiffs = tablesWithDiffs.Contains(td.Name);
             var status = hasDiffs ? "Different" : "Identical";
             var operation = hasDiffs ? "Update" : "Equal";
@@ -89,10 +95,18 @@ public static class CompareResultMapper
                 Status = status,
                 Operation = operation,
                 IsChecked = hasDiffs,
+                ColumnDiffs = colDiffs,   // ← THE FIX: was always new()
             });
         }
 
         vm.RefreshCounters();
         return vm;
     }
+
+    // ── Helper ────────────────────────────────────────────────────────────────
+    private static List<DiffItem> DiffItemsForTable ( CompareResult result, string tableName ) =>
+        result.DiffItems
+              .Where(d => d.ParentName != null &&
+                     d.ParentName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+              .ToList();
 }

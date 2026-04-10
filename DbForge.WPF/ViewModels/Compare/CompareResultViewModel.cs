@@ -1,5 +1,4 @@
 ﻿using DbForge.Core.Models.Schema;
-using DbForge.Providers.SqlServer.Script;
 using DbForge.WPF.ViewModels.Base;
 using DbForge.WPF.Windows.Commands;
 using System.Collections.ObjectModel;
@@ -17,7 +16,7 @@ public class CompareResultViewModel : BaseViewModel
     public string TargetLabel { get; init; } = string.Empty;
     public string StatusText { get; set; } = string.Empty;
 
-    // ── Counters (set by mapper, displayed in status bar) ─────────────────────
+    // ── Counters ──────────────────────────────────────────────────────────────
     public int AddedCount { get; set; }
     public int RemovedCount { get; set; }
     public int ModifiedCount { get; set; }
@@ -29,26 +28,20 @@ public class CompareResultViewModel : BaseViewModel
     private readonly ObservableCollection<CompareRowViewModel> _allRows = new();
     public ListCollectionView ItemsView { get; }
 
-    // ── Schema models — needed so UpdateSqlPanel can generate DDL ─────────────
-    // These MUST be set before any row is selected. The mapper sets them via
-    // object-initializer immediately after constructing the VM.
+    // ── Schema models ─────────────────────────────────────────────────────────
     private SchemaModel? _sourceSchema;
-    private SchemaModel? _targetSchema;
-
     public SchemaModel? SourceSchema
     {
         get => _sourceSchema;
         set => Set(ref _sourceSchema, value);
     }
 
+    private SchemaModel? _targetSchema;
     public SchemaModel? TargetSchema
     {
         get => _targetSchema;
         set => Set(ref _targetSchema, value);
     }
-
-    // ── SQL generator (stateless, safe to reuse) ───────────────────────────────
-    private readonly SqlScriptGenerator _sqlGen = new();
 
     // ── Selected row ──────────────────────────────────────────────────────────
     private CompareRowViewModel? _selectedRow;
@@ -60,23 +53,24 @@ public class CompareResultViewModel : BaseViewModel
             Set(ref _selectedRow, value);
             OnPropertyChanged(nameof(SourcePaneHeader));
             OnPropertyChanged(nameof(TargetPaneHeader));
-            UpdateSqlPanel();
+            UpdateDiffPanel();
         }
     }
 
-    // ── SQL pane content (bound to the two TextBoxes in the XAML) ─────────────
-    private string _sourceSql = string.Empty;
-    public string SourceSql
+    // ── Side-by-side diff pairs (bound to the DataGrid in the SQL pane) ───────
+    private ObservableCollection<SqlDiffPair> _diffPairs = new();
+    public ObservableCollection<SqlDiffPair> DiffPairs
     {
-        get => _sourceSql;
-        set => Set(ref _sourceSql, value);
+        get => _diffPairs;
+        private set => Set(ref _diffPairs, value);
     }
 
-    private string _targetSql = string.Empty;
-    public string TargetSql
+    // ── Object tree (left panel of the SQL pane) ───────────────────────────────
+    private ObservableCollection<DiffTreeNode> _diffTree = new();
+    public ObservableCollection<DiffTreeNode> DiffTree
     {
-        get => _targetSql;
-        set => Set(ref _targetSql, value);
+        get => _diffTree;
+        private set => Set(ref _diffTree, value);
     }
 
     // ── SQL pane header labels ─────────────────────────────────────────────────
@@ -88,25 +82,29 @@ public class CompareResultViewModel : BaseViewModel
         ? $"[{_selectedRow.TargetOwner}].[{_selectedRow.TargetObjectName}]"
         : TargetLabel;
 
-    // ── SQL generation ────────────────────────────────────────────────────────
-    private void UpdateSqlPanel ()
+    // ── Diff panel update ─────────────────────────────────────────────────────
+    private void UpdateDiffPanel ()
     {
         if ( SelectedRow == null )
         {
-            SourceSql = string.Empty;
-            TargetSql = string.Empty;
+            DiffPairs = new ObservableCollection<SqlDiffPair>();
+            DiffTree = new ObservableCollection<DiffTreeNode>();
             return;
         }
 
-        // Use whichever name is available — OnlyInTarget rows have no source name
         var tableName = !string.IsNullOrWhiteSpace(SelectedRow.SourceObjectName)
             ? SelectedRow.SourceObjectName
             : SelectedRow.TargetObjectName;
 
         if ( string.IsNullOrWhiteSpace(tableName) )
         {
-            SourceSql = "-- No table name on this row";
-            TargetSql = "-- No table name on this row";
+            DiffPairs = new ObservableCollection<SqlDiffPair>(new[]
+            {
+                SqlDiffPair.Both(
+                    SqlDiffLine.Context("-- No table name on this row"),
+                    SqlDiffLine.Context("-- No table name on this row"))
+            });
+            DiffTree = new ObservableCollection<DiffTreeNode>();
             return;
         }
 
@@ -116,13 +114,14 @@ public class CompareResultViewModel : BaseViewModel
         var tgtTable = _targetSchema?.Tables
             .FirstOrDefault(t => t.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase));
 
-        SourceSql = srcTable != null
-            ? _sqlGen.GenerateTableScript(srcTable)
-            : "-- Table does not exist in source";
+        // Column diffs come from the row itself (populated by the mapper)
+        var columnDiffs = SelectedRow.ColumnDiffs;
 
-        TargetSql = tgtTable != null
-            ? _sqlGen.GenerateTableScript(tgtTable)
-            : "-- Table does not exist in target";
+        var pairs = SqlDiffBuilder.BuildDiffPairs(srcTable, tgtTable, columnDiffs);
+        var tree = SqlDiffBuilder.BuildTree(srcTable, tgtTable, columnDiffs, tableName);
+
+        DiffPairs = new ObservableCollection<SqlDiffPair>(pairs);
+        DiffTree = tree;
     }
 
     // ── Filters ───────────────────────────────────────────────────────────────
@@ -206,14 +205,18 @@ public class CompareResultViewModel : BaseViewModel
 
         CopySourceCommand = new RelayCommand(_ =>
         {
-            if ( !string.IsNullOrEmpty(SourceSql) )
-                Clipboard.SetText(SourceSql);
+            var text = string.Join(Environment.NewLine,
+                DiffPairs.Select(p => p.Source.Text));
+            if ( !string.IsNullOrEmpty(text) )
+                Clipboard.SetText(text);
         });
 
         CopyTargetCommand = new RelayCommand(_ =>
         {
-            if ( !string.IsNullOrEmpty(TargetSql) )
-                Clipboard.SetText(TargetSql);
+            var text = string.Join(Environment.NewLine,
+                DiffPairs.Select(p => p.Target.Text));
+            if ( !string.IsNullOrEmpty(text) )
+                Clipboard.SetText(text);
         });
 
         SelectAllCommand = new RelayCommand(_ =>

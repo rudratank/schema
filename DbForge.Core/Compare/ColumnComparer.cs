@@ -49,7 +49,7 @@ namespace DbForge.Core.Compare
                         diffs.Add(new DiffItem
                         {
                             ObjectType = ObjectType.Column,
-                            ObjectName = r.Name,
+                            ObjectName = $"{r.Name} → {a.Name}",
                             ParentName = source.Name,
                             DiffType = DiffType.Modified,
                             SourceDefinition = r,
@@ -124,9 +124,38 @@ namespace DbForge.Core.Compare
 
         private bool IsPossibleRename ( ColumnDefinition a, ColumnDefinition b )
         {
-            return a.DataType == b.DataType &&
-                   a.FullDataType == b.FullDataType &&
-                   a.IsNullable == b.IsNullable;
+            int score = 0;
+
+            // Same base type → strong signal
+            if ( a.DataType == b.DataType )
+                score += 3;
+
+            // Nullable same → medium signal
+            if ( a.IsNullable == b.IsNullable )
+                score += 1;
+
+            // Length similar (not exact required)
+            if ( a.CharacterMaxLength.HasValue && b.CharacterMaxLength.HasValue )
+            {
+                var diff = Math.Abs(a.CharacterMaxLength.Value - b.CharacterMaxLength.Value);
+                if ( diff <= 50 ) // allow flexibility
+                    score += 1;
+            }
+
+            // Name similarity (VERY IMPORTANT)
+            if ( IsNameSimilar(a.Name, b.Name) )
+                score += 3;
+
+            return score >= 4; // threshold
+        }
+
+        private bool IsNameSimilar ( string a, string b )
+        {
+            a = a.ToLower();
+            b = b.ToLower();
+
+            // simple contains logic (can upgrade later)
+            return a.Contains(b) || b.Contains(a);
         }
 
         private List<string> GetChangedProperties ( ColumnDefinition a, ColumnDefinition b )
