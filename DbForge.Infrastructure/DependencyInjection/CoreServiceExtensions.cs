@@ -29,7 +29,16 @@ public static class CoreServiceExtensions
         services.AddSingleton<IProviderRegistry, ProviderRegistry>();
 
         services.AddDbContext<AppDbContext>(opt =>
-            opt.UseSqlite("Data Source=dbforge.db"));
+        {
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "DbForge",
+                "app.db");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+            opt.UseSqlite($"Data Source={path}");
+        });
 
         services.AddScoped<IConnectionRepository, SqliteConnectionRepository>();
 

@@ -14,6 +14,6 @@ namespace DbForge.Core.Models.Schema
         public List<IndexDefinition> Indexes { get; set; } = new();
         public List<ForeignKeyDefinition> ForeignKeys { get; set; } = new();
 
-        public string FullName => string.IsNullOrEmpty(SchemaName) ? Name : $"{SchemaName}.{Name}";
+        //public string FullName => string.IsNullOrEmpty(SchemaName) ? Name : $"{SchemaName}.{Name}";
     }
 }

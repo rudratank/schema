@@ -7,8 +7,9 @@
         Index = 3,
         ForeignKey = 4,
         View = 5,
-        StoredProcedure = 6,
+        Procedure = 6,
         Function = 7,
-        Trigger = 8
+        Trigger = 8,
+        Synonym = 9   // ← NEW
     }
 }

@@ -6,9 +6,10 @@
 
         Title="DbForge Studio"
         Width="1280" Height="750"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource BgApp}">
 
-    <DockPanel>
+    <DockPanel Background="{DynamicResource BgApp}">
 
         <!-- ── Menu bar ───────────────────────────────────────────────────── -->
         <Menu DockPanel.Dock="Top">
@@ -23,6 +24,10 @@
                 </MenuItem>
             </MenuItem>
 
+            <MenuItem Header="_Settings">
+                <MenuItem Header="_Preferences" Click="Settings_Click"/>
+            </MenuItem>
+
         </Menu>
 
         <!-- ── Status bar ─────────────────────────────────────────────────── -->
@@ -33,7 +38,7 @@
         </StatusBar>
 
         <!-- ── Main layout: left tree | splitter | right content ──────────── -->
-        <Grid>
+        <Grid Background="{DynamicResource BgApp}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="260" MinWidth="150" MaxWidth="500"/>
                 <ColumnDefinition Width="4"/>
@@ -41,11 +46,11 @@
             </Grid.ColumnDefinitions>
 
             <!-- Object Explorer panel -->
-            <DockPanel Grid.Column="0">
+            <DockPanel Grid.Column="0" Background="{DynamicResource BgPanel}">
 
                 <!-- Panel header -->
                 <Border DockPanel.Dock="Top"
-                        BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                        BorderBrush="{DynamicResource Border}"
                         BorderThickness="0,0,0,1" Padding="8,5">
                     <TextBlock Text="Object Explorer" FontWeight="SemiBold" FontSize="12"/>
                 </Border>
@@ -89,13 +94,14 @@
 
             <!-- Resize handle -->
             <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
-                          Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                          Background="{DynamicResource BorderLight}"/>
 
             <!-- Right content area — empty for now, tabs/editor goes here later -->
-            <Grid Grid.Column="2">
+            <Grid Grid.Column="2"
+                  Background="{DynamicResource BgPanel}">
                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                            Text="Connect to a server to begin"
-                           Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
+                          Foreground="{DynamicResource FgMuted}"
                            FontSize="15"/>
             </Grid>
         </Grid>

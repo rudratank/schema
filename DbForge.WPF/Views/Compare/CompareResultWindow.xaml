@@ -4,959 +4,880 @@
         xmlns:vm="clr-namespace:DbForge.WPF.ViewModels.Compare"
         xmlns:h="clr-namespace:DbForge.WPF.UI.Helpers"
         Title="Schema Compare — Results"
-        Width="1400" Height="860"
-        MinWidth="900" MinHeight="560"
+        Width="1440" Height="880"
+        MinWidth="960" MinHeight="580"
         WindowStartupLocation="CenterOwner"
-        Background="#1A1F2E">
+        Background="{DynamicResource BgApp}">
 
     <Window.Resources>
-
-        <!-- ── Palette ───────────────────────────────────────────────────── -->
-        <SolidColorBrush x:Key="BgApp"        Color="#1A1F2E"/>
-        <SolidColorBrush x:Key="BgPanel"      Color="#242937"/>
-        <SolidColorBrush x:Key="BgHeader"     Color="#141824"/>
-        <SolidColorBrush x:Key="BgRow"        Color="#1E2332"/>
-        <SolidColorBrush x:Key="BgRowAlt"     Color="#1A1F2E"/>
-        <SolidColorBrush x:Key="BgRowHover"   Color="#2A3045"/>
-        <SolidColorBrush x:Key="BgRowSel"     Color="#1C3A6B"/>
-        <SolidColorBrush x:Key="BgColHeader"  Color="#141824"/>
-        <SolidColorBrush x:Key="BgCodePane"   Color="#0D1117"/>
-
-        <!-- Group colours -->
-        <SolidColorBrush x:Key="BgGroupSrc"   Color="#2A1F0A"/>
-        <SolidColorBrush x:Key="AccentSrc"    Color="#F59E0B"/>
-        <SolidColorBrush x:Key="BgGroupDiff"  Color="#0A1A2E"/>
-        <SolidColorBrush x:Key="AccentDiff"   Color="#3B82F6"/>
-        <SolidColorBrush x:Key="BgGroupTgt"   Color="#2A0A0A"/>
-        <SolidColorBrush x:Key="AccentTgt"    Color="#EF4444"/>
-        <SolidColorBrush x:Key="BgGroupEq"    Color="#181E2C"/>
-        <SolidColorBrush x:Key="AccentEq"     Color="#6B7280"/>
-
-        <!-- Text -->
-        <SolidColorBrush x:Key="FgPrimary"    Color="#E2E8F0"/>
-        <SolidColorBrush x:Key="FgMuted"      Color="#64748B"/>
-        <SolidColorBrush x:Key="FgCode"       Color="#E2E8F0"/>
-
-        <!-- Borders -->
-        <SolidColorBrush x:Key="Border"       Color="#2D3748"/>
-        <SolidColorBrush x:Key="BorderLight"  Color="#374151"/>
-
-        <!-- Op colours -->
-        <SolidColorBrush x:Key="OpCreate"     Color="#22C55E"/>
-        <SolidColorBrush x:Key="OpUpdate"     Color="#3B82F6"/>
-        <SolidColorBrush x:Key="OpDrop"       Color="#EF4444"/>
-        <SolidColorBrush x:Key="OpEqual"      Color="#4B5563"/>
-
-        <!--
-            Diff line background colours (GitHub palette, dark)
-            DiffModified → dark amber tint (line gets a barely-visible warmth;
-            the *changed tokens* get a strong inline background via TextBlockHelper).
-        -->
-        <SolidColorBrush x:Key="DiffAdded"    Color="#0D2818"/>
-        <SolidColorBrush x:Key="DiffRemoved"  Color="#2D1212"/>
-        <SolidColorBrush x:Key="DiffModified" Color="#141000"/>
-        <!-- dark amber tint, was #1A1A2E -->
-        <SolidColorBrush x:Key="DiffEmpty"    Color="#0A0D14"/>
-        <SolidColorBrush x:Key="DiffSection"  Color="#161B27"/>
-
-        <!-- Diff line foreground (used for Added / Removed full-line text colour) -->
-        <SolidColorBrush x:Key="FgAdded"      Color="#3FB950"/>
-        <SolidColorBrush x:Key="FgRemoved"    Color="#F85149"/>
-        <!-- FgModified intentionally NOT applied to text — only used for gutter -->
-        <SolidColorBrush x:Key="FgModified"   Color="#D97706"/>
-        <!-- amber gutter colour -->
-        <SolidColorBrush x:Key="FgSection"    Color="#484F58"/>
-
-        <!-- Diff gutter symbol colours -->
-        <SolidColorBrush x:Key="GutterAdded"   Color="#238636"/>
-        <SolidColorBrush x:Key="GutterRemoved" Color="#DA3633"/>
-        <SolidColorBrush x:Key="GutterContext" Color="#21262D"/>
-
-        <!-- Tree node status colours -->
-        <SolidColorBrush x:Key="TreeAdded"     Color="#22C55E"/>
-        <SolidColorBrush x:Key="TreeRemoved"   Color="#EF4444"/>
-        <SolidColorBrush x:Key="TreeModified"  Color="#3B82F6"/>
-        <SolidColorBrush x:Key="TreeIdentical" Color="#4B5563"/>
-
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <!-- ── Filter chip toggle button ─────────────────────────────────── -->
-        <Style x:Key="FilterChip" TargetType="ToggleButton">
-            <Setter Property="Padding"         Value="10,4"/>
-            <Setter Property="Margin"          Value="0,0,6,0"/>
-            <Setter Property="FontSize"        Value="11"/>
-            <Setter Property="FontFamily"      Value="Segoe UI"/>
-            <Setter Property="Cursor"          Value="Hand"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="PART_Border"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="False">
-                                <Setter TargetName="PART_Border" Property="Opacity" Value="0.35"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="PART_Border" Property="Opacity" Value="0.85"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <!-- Counter badge style -->
+        <Style x:Key="CountBadge" TargetType="Border">
+            <Setter Property="CornerRadius"    Value="10"/>
+            <Setter Property="Padding"         Value="7,2"/>
+            <Setter Property="MinWidth"        Value="28"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
-        <!-- ── Code pane button ──────────────────────────────────────────── -->
-        <Style x:Key="CodeBtn" TargetType="Button">
-            <Setter Property="Background"      Value="#1E2A3A"/>
-            <Setter Property="Foreground"      Value="#94A3B8"/>
-            <Setter Property="BorderBrush"     Value="#2D3748"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding"         Value="8,3"/>
-            <Setter Property="FontSize"        Value="11"/>
-            <Setter Property="Cursor"          Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2D3A4D"/>
-                </Trigger>
-            </Style.Triggers>
+        <!-- Object type chip (smaller than status chip) -->
+        <Style x:Key="TypeChip" TargetType="ToggleButton" BasedOn="{StaticResource FilterChip}">
+            <Setter Property="Padding"  Value="8,3"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Margin"   Value="0,0,4,0"/>
+            <Setter Property="Background"  Value="{DynamicResource BgCard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+            <Setter Property="Foreground"  Value="{DynamicResource FgSecondary}"/>
         </Style>
-
-        <!-- ── GridViewColumnHeader ──────────────────────────────────────── -->
-        <Style TargetType="GridViewColumnHeader">
-            <Setter Property="Background"                 Value="{StaticResource BgColHeader}"/>
-            <Setter Property="Foreground"                 Value="{StaticResource FgMuted}"/>
-            <Setter Property="FontSize"                   Value="11"/>
-            <Setter Property="FontWeight"                 Value="SemiBold"/>
-            <Setter Property="Padding"                    Value="8,6"/>
-            <Setter Property="BorderBrush"                Value="{StaticResource Border}"/>
-            <Setter Property="BorderThickness"            Value="0,0,1,1"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                Padding="{TemplateBinding Padding}">
-                            <TextBlock Text="{TemplateBinding Content}"
-                                       Foreground="{TemplateBinding Foreground}"
-                                       FontSize="{TemplateBinding FontSize}"
-                                       FontWeight="{TemplateBinding FontWeight}"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ── ListView row ───────────────────────────────────────────────── -->
-        <Style TargetType="ListViewItem">
-            <Setter Property="Background"                 Value="Transparent"/>
-            <Setter Property="Foreground"                 Value="{StaticResource FgPrimary}"/>
-            <Setter Property="Padding"                    Value="0"/>
-            <Setter Property="Margin"                     Value="0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="PART_Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderThickness="0,0,0,1"
-                                BorderBrush="{StaticResource Border}">
-                            <GridViewRowPresenter
-                                Columns="{Binding Path=View.Columns,
-                                    RelativeSource={RelativeSource AncestorType=ListView}}"
-                                VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="PART_Bd" Property="Background"
-                                        Value="{StaticResource BgRowHover}"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="PART_Bd" Property="Background"
-                                        Value="{StaticResource BgRowSel}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ── TreeView item style ────────────────────────────────────────── -->
-        <Style x:Key="DiffTreeItemStyle" TargetType="TreeViewItem">
-            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-            <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Padding"    Value="2,1"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TreeViewItem">
-                        <StackPanel>
-                            <Border x:Name="PART_Bd"
-                                    Background="{TemplateBinding Background}"
-                                    Padding="{TemplateBinding Padding}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <ToggleButton x:Name="Expander"
-                                                  IsChecked="{Binding IsExpanded,
-                                                      RelativeSource={RelativeSource TemplatedParent}}"
-                                                  Visibility="Collapsed"
-                                                  Width="14" Margin="0,0,2,0"
-                                                  Focusable="False" ClickMode="Press"/>
-                                    <ContentPresenter Grid.Column="1"
-                                                      ContentSource="Header"
-                                                      HorizontalAlignment="Left"
-                                                      VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                            <ItemsPresenter x:Name="ItemsHost" Margin="14,0,0,0"/>
-                        </StackPanel>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="HasItems"   Value="True">
-                                <Setter TargetName="Expander" Property="Visibility" Value="Visible"/>
-                            </Trigger>
-                            <Trigger Property="IsExpanded" Value="False">
-                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="PART_Bd" Property="Background" Value="#1C3A6B"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="PART_Bd" Property="Background" Value="#2A3045"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </Window.Resources>
 
-    <DockPanel>
+    <Grid>
+        <DockPanel>
 
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <!-- HEADER BAR                                                       -->
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <Border DockPanel.Dock="Top"
-                Background="{StaticResource BgHeader}"
-                BorderBrush="{StaticResource Border}"
-                BorderThickness="0,0,0,1"
-                Padding="16,8">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#1A2234" CornerRadius="4"
-                            BorderBrush="#2D3748" BorderThickness="1"
-                            Padding="10,5" Margin="0,0,10,0">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="10" Height="10" Margin="0,0,6,0"
-                                    CornerRadius="2" Background="#22C55E" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SourceLabel}"
-                                       Foreground="{StaticResource FgPrimary}"
-                                       FontSize="13" FontWeight="SemiBold" FontFamily="Consolas"/>
-                        </StackPanel>
-                    </Border>
-                    <TextBlock Text="⟶" Foreground="#3B82F6" FontSize="20"
-                               VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <Border Background="#1A2234" CornerRadius="4"
-                            BorderBrush="#2D3748" BorderThickness="1" Padding="10,5">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="10" Height="10" Margin="0,0,6,0"
-                                    CornerRadius="2" Background="#EF4444" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding TargetLabel}"
-                                       Foreground="{StaticResource FgPrimary}"
-                                       FontSize="13" FontWeight="SemiBold" FontFamily="Consolas"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-                <TextBlock Grid.Column="1"
-                           Text="{Binding TotalSelected}"
-                           Foreground="{StaticResource FgMuted}"
-                           FontSize="12" VerticalAlignment="Center"/>
-            </Grid>
-        </Border>
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- HEADER BAR                                                     -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Top"
+                    Background="{DynamicResource BgHeader}"
+                    BorderBrush="{DynamicResource Border}"
+                    BorderThickness="0,0,0,1"
+                    Padding="16,9">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <!-- STATUS BAR                                                       -->
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <StatusBar DockPanel.Dock="Bottom"
-                   Background="{StaticResource BgHeader}"
-                   Foreground="#64748B"
-                   BorderBrush="{StaticResource Border}"
-                   BorderThickness="0,1,0,0">
-            <StatusBarItem>
-                <TextBlock Text="{Binding StatusText}" FontSize="11"/>
-            </StatusBarItem>
-            <Separator/>
-            <StatusBarItem>
-                <TextBlock Text="{Binding TotalSelected}" FontSize="11"/>
-            </StatusBarItem>
-        </StatusBar>
+                    <!-- Left: db labels + arrow + refresh -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <!-- TOOLBAR                                                          -->
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <Border DockPanel.Dock="Top"
-                Background="{StaticResource BgPanel}"
-                BorderBrush="{StaticResource Border}"
-                BorderThickness="0,0,0,1"
-                Padding="12,5">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Show:" Foreground="{StaticResource FgMuted}"
-                           FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <ToggleButton Style="{StaticResource FilterChip}"
-                              IsChecked="{Binding ShowOnlyInSource}"
-                              Background="#2A1F0A" BorderBrush="#F59E0B">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="7" Height="7" Fill="#F59E0B" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Only in Source" Foreground="#F59E0B"/>
-                    </StackPanel>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource FilterChip}"
-                              IsChecked="{Binding ShowDifferent}"
-                              Background="#0A1A2E" BorderBrush="#3B82F6">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="7" Height="7" Fill="#3B82F6" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Different" Foreground="#3B82F6"/>
-                    </StackPanel>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource FilterChip}"
-                              IsChecked="{Binding ShowOnlyInTarget}"
-                              Background="#2A0A0A" BorderBrush="#EF4444">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="7" Height="7" Fill="#EF4444" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Only in Target" Foreground="#EF4444"/>
-                    </StackPanel>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource FilterChip}"
-                              IsChecked="{Binding ShowIdentical}"
-                              Background="#181E2C" BorderBrush="#4B5563">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="7" Height="7" Fill="#6B7280" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Identical" Foreground="#6B7280"/>
-                    </StackPanel>
-                </ToggleButton>
-                <Separator Background="{StaticResource Border}" Margin="10,2"/>
-                <Border BorderBrush="{StaticResource Border}" BorderThickness="1"
-                        CornerRadius="4" Background="#141824" Padding="7,3">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="🔍" FontSize="10" Foreground="#4B5563"
-                                   VerticalAlignment="Center" Margin="0,0,5,0"/>
-                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="170" BorderThickness="0"
-                                 Background="Transparent"
-                                 Foreground="{StaticResource FgPrimary}"
-                                 FontSize="12" VerticalAlignment="Center"
-                                 CaretBrush="#E2E8F0"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Border>
-
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <!-- MAIN AREA                                                        -->
-        <!-- ════════════════════════════════════════════════════════════════ -->
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="6"/>
-                <RowDefinition x:Name="SqlPaneRow" Height="300" MinHeight="140" MaxHeight="560"/>
-            </Grid.RowDefinitions>
-
-            <!-- ── TOP: compare grid ──────────────────────────────────────── -->
-            <ListView x:Name="CompareList"
-                      Grid.Row="0"
-                      ItemsSource="{Binding ItemsView}"
-                      SelectedItem="{Binding SelectedRow}"
-                      Background="{StaticResource BgRow}"
-                      Foreground="{StaticResource FgPrimary}"
-                      BorderThickness="0"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                      VirtualizingStackPanel.IsVirtualizing="True"
-                      VirtualizingStackPanel.VirtualizationMode="Recycling">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Type" Width="110">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <StackPanel Orientation="Horizontal" Margin="6,0">
-                                        <TextBlock Text="{Binding TypeIcon}" FontSize="12" Margin="0,0,6,0"
-                                                   VerticalAlignment="Center" Foreground="{StaticResource FgMuted}"/>
-                                        <TextBlock Text="{Binding ObjectType}" FontSize="12"
-                                                   VerticalAlignment="Center" Foreground="{StaticResource FgPrimary}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Owner" Width="65">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <TextBlock Text="{Binding Owner}" FontSize="11" Margin="6,0"
-                                               Foreground="{StaticResource FgMuted}" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Source Object" Width="220">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <TextBlock Text="{Binding SourceObjectName}" FontSize="12" Margin="6,0"
-                                               FontWeight="SemiBold" Foreground="{StaticResource FgPrimary}"
-                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="✓" Width="32">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <CheckBox IsChecked="{Binding IsChecked}"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Operation" Width="110">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <StackPanel Orientation="Horizontal" Margin="6,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding OperationSymbol}" FontSize="14"
-                                                   Margin="0,0,5,0" VerticalAlignment="Center">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Create">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpCreate}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Update">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpUpdate}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Drop">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpDrop}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Equal">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpEqual}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Operation}" FontSize="12" VerticalAlignment="Center">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Create">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpCreate}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Update">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpUpdate}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Drop">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpDrop}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Operation}" Value="Equal">
-                                                            <Setter Property="Foreground" Value="{StaticResource OpEqual}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Target Object" Width="220">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <TextBlock Text="{Binding TargetObjectName}" FontSize="12" Margin="6,0"
-                                               FontWeight="SemiBold" Foreground="{StaticResource FgPrimary}"
-                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Owner" Width="65">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
-                                    <TextBlock Text="{Binding TargetOwner}" FontSize="11" Margin="6,0"
-                                               Foreground="{StaticResource FgMuted}" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-                <ListView.GroupStyle>
-                    <GroupStyle>
-                        <GroupStyle.HeaderTemplate>
-                            <DataTemplate>
-                                <Border x:Name="GroupHeaderBd" Padding="10,6"
-                                        BorderThickness="0,0,0,1" BorderBrush="{StaticResource Border}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Ellipse x:Name="StatusDot" Width="9" Height="9" Fill="#F59E0B"
-                                                 VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBlock FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center">
-                                            <Run Text="{Binding Name,Mode=OneWay}"/>
-                                            <Run Text=" (" Foreground="#4B5563"/>
-                                            <Run Text="{Binding ItemCount,Mode=OneWay}" Foreground="#4B5563"/>
-                                            <Run Text=" objects)" Foreground="#4B5563"/>
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Only in Source">
-                                                    <Setter Property="Background" Value="{StaticResource BgGroupSrc}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Different">
-                                                    <Setter Property="Background" Value="{StaticResource BgGroupDiff}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Only in Target">
-                                                    <Setter Property="Background" Value="{StaticResource BgGroupTgt}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Identical">
-                                                    <Setter Property="Background" Value="{StaticResource BgGroupEq}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Only in Source">
-                                        <Setter TargetName="StatusDot" Property="Fill" Value="{StaticResource AccentSrc}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Different">
-                                        <Setter TargetName="StatusDot" Property="Fill" Value="{StaticResource AccentDiff}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Only in Target">
-                                        <Setter TargetName="StatusDot" Property="Fill" Value="{StaticResource AccentTgt}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Name,Mode=OneWay}" Value="Identical">
-                                        <Setter TargetName="StatusDot" Property="Fill" Value="{StaticResource AccentEq}"/>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </GroupStyle.HeaderTemplate>
-                    </GroupStyle>
-                </ListView.GroupStyle>
-            </ListView>
-
-            <!-- ── GridSplitter ───────────────────────────────────────────── -->
-            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                          Background="#0D1117" Cursor="SizeNS">
-                <GridSplitter.Template>
-                    <ControlTemplate TargetType="GridSplitter">
-                        <Border Background="#0D1117">
-                            <Rectangle Height="2" Width="40" Fill="#2D3748"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                       RadiusX="1" RadiusY="1"/>
-                        </Border>
-                    </ControlTemplate>
-                </GridSplitter.Template>
-            </GridSplitter>
-
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- BOTTOM: diff pane                                            -->
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <Grid Grid.Row="2" Background="{StaticResource BgCodePane}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="190" MinWidth="120" MaxWidth="320"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- ── Object Tree ───────────────────────────────────────── -->
-                <DockPanel Grid.Column="0" Background="#0D1117">
-                    <Border DockPanel.Dock="Top" Background="#141824"
-                            BorderBrush="{StaticResource Border}" BorderThickness="0,0,1,1" Padding="10,6">
-                        <TextBlock Text="Objects" FontSize="11" FontWeight="SemiBold"
-                                   Foreground="{StaticResource FgMuted}" VerticalAlignment="Center"/>
-                    </Border>
-                    <ScrollViewer DockPanel.Dock="Bottom"
-                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                                  Background="#0D1117">
-                        <TreeView ItemsSource="{Binding DiffTree}"
-                                  Background="Transparent" BorderThickness="0"
-                                  Foreground="{StaticResource FgPrimary}"
-                                  ItemContainerStyle="{StaticResource DiffTreeItemStyle}">
-                            <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding Children}"
-                                                          DataType="{x:Type vm:DiffTreeNode}">
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <Ellipse Width="6" Height="6" VerticalAlignment="Center" Margin="0,0,5,0">
-                                            <Ellipse.Style>
-                                                <Style TargetType="Ellipse">
-                                                    <Setter Property="Fill" Value="{StaticResource TreeIdentical}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DiffStatus}" Value="Added">
-                                                            <Setter Property="Fill" Value="{StaticResource TreeAdded}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding DiffStatus}" Value="Removed">
-                                                            <Setter Property="Fill" Value="{StaticResource TreeRemoved}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding DiffStatus}" Value="Modified">
-                                                            <Setter Property="Fill" Value="{StaticResource TreeModified}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Ellipse.Style>
-                                        </Ellipse>
-                                        <TextBlock Text="{Binding Icon}" FontSize="10"
-                                                   Margin="0,0,4,0" VerticalAlignment="Center" Foreground="#4B5563"/>
-                                        <TextBlock Text="{Binding Label}" FontSize="11" FontFamily="Consolas"
-                                                   VerticalAlignment="Center">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{StaticResource FgPrimary}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding DiffStatus}" Value="Added">
-                                                            <Setter Property="Foreground" Value="{StaticResource TreeAdded}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding DiffStatus}" Value="Removed">
-                                                            <Setter Property="Foreground" Value="{StaticResource TreeRemoved}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding DiffStatus}" Value="Modified">
-                                                            <Setter Property="Foreground" Value="{StaticResource TreeModified}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
-                            </TreeView.ItemTemplate>
-                        </TreeView>
-                    </ScrollViewer>
-                </DockPanel>
-
-                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#0D1117"/>
-
-                <!-- ══════════════════════════════════════════════════════ -->
-                <!-- SOURCE diff pane                                        -->
-                <!-- ══════════════════════════════════════════════════════ -->
-                <DockPanel Grid.Column="2" Background="{StaticResource BgCodePane}">
-                    <Border DockPanel.Dock="Top" Background="#141824"
-                            BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="12,6">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <!-- Source db chip -->
+                        <Border Background="{DynamicResource BgCard}"
+                                CornerRadius="{DynamicResource RadiusSmall}"
+                                BorderBrush="{DynamicResource ColorSuccess}"
+                                BorderThickness="1" Padding="10,5">
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="10" Height="10" CornerRadius="2"
-                                        Background="#22C55E" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding SourcePaneHeader}"
-                                           FontFamily="Consolas" FontSize="12"
-                                           Foreground="{StaticResource FgPrimary}" VerticalAlignment="Center"/>
+                                <Border Width="9" Height="9" CornerRadius="2"
+                                        Background="{DynamicResource ColorSuccess}"
+                                        Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SourceLabel}"
+                                           Foreground="{DynamicResource FgPrimary}"
+                                           FontSize="13" FontWeight="SemiBold" FontFamily="Consolas"/>
                             </StackPanel>
-                            <Button Grid.Column="1" Style="{StaticResource CodeBtn}"
-                                    Content="⎘  Copy" Command="{Binding CopySourceCommand}"/>
-                        </Grid>
-                    </Border>
+                        </Border>
 
-                    <ScrollViewer x:Name="SourceScroller" DockPanel.Dock="Bottom"
-                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding DiffPairs}"
-                                      Background="{StaticResource BgCodePane}"
-                                      VirtualizingStackPanel.IsVirtualizing="True"
-                                      VirtualizingStackPanel.VirtualizationMode="Recycling">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:SqlDiffPair}">
+                        <TextBlock Text="⟶" Foreground="{DynamicResource AccentPrimary}"
+                                   FontSize="18" VerticalAlignment="Center" Margin="10,0"/>
 
-                                    <!--
-                                        LINE BACKGROUND: set by DataTrigger on Source.LineKind.
-                                        Modified → dark amber tint (#141000) — very subtle.
-                                        The strong per-token highlight is rendered inline by
-                                        TextBlockHelper on the TextBlock below.
-                                    -->
-                                    <Border x:Name="CellBd"
-                                            Background="{StaticResource BgCodePane}"
-                                            BorderThickness="0" MinHeight="20">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="22"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                        <!-- Target db chip -->
+                        <Border Background="{DynamicResource BgCard}"
+                                CornerRadius="{DynamicResource RadiusSmall}"
+                                BorderBrush="{DynamicResource ColorError}"
+                                BorderThickness="1" Padding="10,5">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="9" Height="9" CornerRadius="2"
+                                        Background="{DynamicResource ColorError}"
+                                        Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding TargetLabel}"
+                                           Foreground="{DynamicResource FgPrimary}"
+                                           FontSize="13" FontWeight="SemiBold" FontFamily="Consolas"/>
+                            </StackPanel>
+                        </Border>
 
-                                            <!-- Gutter -->
-                                            <Border x:Name="GutterBd" Background="#161B27"
-                                                    BorderBrush="#21262D" BorderThickness="0,0,1,0">
-                                                <TextBlock x:Name="GutterTxt" Text=""
-                                                           FontFamily="Consolas" FontSize="11"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="#4B5563"/>
-                                            </Border>
+                        <!-- Refresh button -->
+                        <Button Content="⟳  Refresh"
+                                Command="{Binding RefreshCommand}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Margin="18,0,0,0" Padding="12,5" FontSize="12"
+                                Background="{DynamicResource BtnDefaultBg}"
+                                Foreground="{DynamicResource BtnDefaultFg}"
+                                BorderBrush="{DynamicResource AccentPrimary}"
+                                BorderThickness="1" Cursor="Hand"/>
 
-                                            <!--
-                                                CODE TEXT
-                                                ─────────
-                                                • No Text= binding — content comes from TextBlockHelper.Segments
-                                                  which populates TextBlock.Inlines.
-                                                • HighlightKind="Source" → changed tokens get deep-amber
-                                                  background (#5C2800).
-                                                • Foreground is set via DataTriggers below for Added/Removed;
-                                                  Modified lines intentionally have NO Foreground trigger
-                                                  so text stays the normal FgCode colour.
-                                                • Run elements inside Inlines inherit Foreground from the
-                                                  TextBlock, so Added (green) and Removed (red) still work.
-                                            -->
-                                            <TextBlock Grid.Column="1"
-                                                       x:Name="CodeTxt"
-                                                       h:TextBlockHelper.HighlightKind="Source"
-                                                       h:TextBlockHelper.Segments="{Binding Source.Segments}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       Padding="8,2"
-                                                       VerticalAlignment="Center"
-                                                       TextWrapping="NoWrap"
-                                                       Foreground="{StaticResource FgCode}"/>
-                                        </Grid>
+                        <!-- Counter badges -->
+                        <Border Style="{StaticResource CountBadge}"
+                                Background="{DynamicResource BgSuccess}"
+                                BorderBrush="{DynamicResource ColorSuccess}"
+                                BorderThickness="1" Margin="18,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="+" Foreground="{DynamicResource ColorSuccess}"
+                                           FontWeight="Bold" FontSize="11" Margin="0,0,3,0"/>
+                                <TextBlock Text="{Binding AddedCount}"
+                                           Foreground="{DynamicResource ColorSuccess}" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource CountBadge}"
+                                Background="{DynamicResource BgWarning}"
+                                BorderBrush="{DynamicResource ColorWarning}"
+                                BorderThickness="1" Margin="5,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="~" Foreground="{DynamicResource ColorWarning}"
+                                           FontWeight="Bold" FontSize="11" Margin="0,0,3,0"/>
+                                <TextBlock Text="{Binding ModifiedCount}"
+                                           Foreground="{DynamicResource ColorWarning}" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource CountBadge}"
+                                Background="{DynamicResource BgError}"
+                                BorderBrush="{DynamicResource ColorError}"
+                                BorderThickness="1" Margin="5,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="−" Foreground="{DynamicResource ColorError}"
+                                           FontWeight="Bold" FontSize="11" Margin="0,0,3,0"/>
+                                <TextBlock Text="{Binding RemovedCount}"
+                                           Foreground="{DynamicResource ColorError}" FontSize="11"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
 
-                                        <!-- Line background per LineKind -->
+                    <!-- Right: selection count + deselect/select all -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding TotalSelected}"
+                                   Foreground="{DynamicResource FgMuted}"
+                                   FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <Button Content="✓ All"   Command="{Binding SelectAllCommand}"
+                                Padding="8,4" FontSize="11" Margin="0,0,5,0"/>
+                        <Button Content="✗ None"  Command="{Binding DeselectAllCommand}"
+                                Padding="8,4" FontSize="11"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- STATUS BAR                                                     -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <StatusBar DockPanel.Dock="Bottom"
+                       BorderBrush="{DynamicResource Border}" BorderThickness="0,1,0,0">
+                <StatusBarItem>
+                    <TextBlock Text="{Binding StatusText}" FontSize="11"/>
+                </StatusBarItem>
+                <Separator/>
+                <StatusBarItem>
+                    <TextBlock Text="{Binding TotalSelected}" FontSize="11"/>
+                </StatusBarItem>
+            </StatusBar>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- TOOLBAR  (status filters + type filters + search)             -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <Border DockPanel.Dock="Top"
+                    Background="{DynamicResource BgPanel}"
+                    BorderBrush="{DynamicResource Border}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,5">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+                    <!-- Row 1: status chips + search -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="Status:" Foreground="{DynamicResource FgMuted}"
+                                   FontSize="10" VerticalAlignment="Center" Margin="0,0,8,0"
+                                   FontWeight="SemiBold"/>
+
+                        <ToggleButton Style="{StaticResource FilterChip}"
+                                      IsChecked="{Binding ShowOnlyInSource}"
+                                      Background="{DynamicResource BgGroupSrc}"
+                                      BorderBrush="{DynamicResource AccentSrc}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentSrc}"
+                                         Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Only in Source" Foreground="{DynamicResource AccentSrc}"/>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton Style="{StaticResource FilterChip}"
+                                      IsChecked="{Binding ShowDifferent}"
+                                      Background="{DynamicResource BgGroupDiff}"
+                                      BorderBrush="{DynamicResource AccentDiff}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentDiff}"
+                                         Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Different" Foreground="{DynamicResource AccentDiff}"/>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton Style="{StaticResource FilterChip}"
+                                      IsChecked="{Binding ShowOnlyInTarget}"
+                                      Background="{DynamicResource BgGroupTgt}"
+                                      BorderBrush="{DynamicResource AccentTgt}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentTgt}"
+                                         Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Only in Target" Foreground="{DynamicResource AccentTgt}"/>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <ToggleButton Style="{StaticResource FilterChip}"
+                                      IsChecked="{Binding ShowIdentical}"
+                                      Background="{DynamicResource BgGroupEq}"
+                                      BorderBrush="{DynamicResource AccentEq}">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="6" Height="6" Fill="{DynamicResource AccentEq}"
+                                         Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Identical" Foreground="{DynamicResource AccentEq}"/>
+                            </StackPanel>
+                        </ToggleButton>
+
+                        <Separator Margin="6,0"/>
+
+                        <!-- Search box -->
+                        <Border BorderBrush="{DynamicResource Border}" BorderThickness="1"
+                                CornerRadius="{DynamicResource RadiusSmall}"
+                                Background="{DynamicResource BgHeader}" Padding="7,3">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔍" FontSize="10"
+                                           Foreground="{DynamicResource FgMuted}"
+                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="170" BorderThickness="0"
+                                         Background="Transparent"
+                                         Foreground="{DynamicResource FgPrimary}"
+                                         FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Row 2: object-type chips -->
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Types:  " Foreground="{DynamicResource FgMuted}"
+                                   FontSize="10" VerticalAlignment="Center"
+                                   FontWeight="SemiBold"/>
+                        <ToggleButton Style="{StaticResource TypeChip}"
+                                      IsChecked="{Binding ShowTables}">
+                            <TextBlock Text="⊞  Tables"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource TypeChip}"
+                                      IsChecked="{Binding ShowProcedures}">
+                            <TextBlock Text="⚙  Procedures"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource TypeChip}"
+                                      IsChecked="{Binding ShowViews}">
+                            <TextBlock Text="◫  Views"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource TypeChip}"
+                                      IsChecked="{Binding ShowFunctions}">
+                            <TextBlock Text="ƒ  Functions"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource TypeChip}"
+                                      IsChecked="{Binding ShowTriggers}">
+                            <TextBlock Text="⚡  Triggers"/>
+                        </ToggleButton>
+                        <ToggleButton Style="{StaticResource TypeChip}"
+                                      IsChecked="{Binding ShowSynonyms}">
+                            <TextBlock Text="↔  Synonyms"/>
+                        </ToggleButton>
+                    </StackPanel>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- MAIN AREA                                                      -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition x:Name="SqlPaneRow" Height="320" MinHeight="150" MaxHeight="580"/>
+                </Grid.RowDefinitions>
+
+                <!-- ── Compare grid ──────────────────────────────────────── -->
+                <ListView x:Name="CompareList"
+                          Grid.Row="0"
+                          ItemsSource="{Binding ItemsView}"
+                          SelectedItem="{Binding SelectedRow}"
+                          Background="{DynamicResource BgRow}"
+                          Foreground="{DynamicResource FgPrimary}"
+                          BorderThickness="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Type" Width="110">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <StackPanel Orientation="Horizontal" Margin="6,0">
+                                            <TextBlock Text="{Binding TypeIcon}" FontSize="12"
+                                                       Margin="0,0,6,0" VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource FgMuted}"/>
+                                            <TextBlock Text="{Binding ObjectType}" FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Owner" Width="65">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <TextBlock Text="{Binding Owner}" FontSize="11" Margin="6,0"
+                                                   Foreground="{DynamicResource FgMuted}"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Source Object" Width="230">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <TextBlock Text="{Binding SourceObjectName}" FontSize="12"
+                                                   Margin="6,0" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="✓" Width="32">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <CheckBox IsChecked="{Binding IsChecked}"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" Margin="0"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Operation" Width="115">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <StackPanel Orientation="Horizontal" Margin="6,0"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding OperationSymbol}" FontSize="14"
+                                                       Margin="0,0,5,0" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Operation}" Value="Create">
+                                                                <Setter Property="Foreground" Value="{DynamicResource OpCreate}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Operation}" Value="Update">
+                                                                <Setter Property="Foreground" Value="{DynamicResource OpUpdate}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Operation}" Value="Drop">
+                                                                <Setter Property="Foreground" Value="{DynamicResource OpDrop}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Operation}" FontSize="12"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Operation}" Value="Create">
+                                                                <Setter Property="Foreground" Value="{DynamicResource OpCreate}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Operation}" Value="Update">
+                                                                <Setter Property="Foreground" Value="{DynamicResource OpUpdate}"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Operation}" Value="Drop">
+                                                                <Setter Property="Foreground" Value="{DynamicResource OpDrop}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Target Object" Width="230">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <TextBlock Text="{Binding TargetObjectName}" FontSize="12"
+                                                   Margin="6,0" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Owner" Width="65">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CompareRowViewModel}">
+                                        <TextBlock Text="{Binding TargetOwner}" FontSize="11"
+                                                   Margin="6,0" Foreground="{DynamicResource FgMuted}"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <Border x:Name="GroupHeaderBd" Padding="10,6"
+                                            BorderThickness="0,0,0,1"
+                                            BorderBrush="{DynamicResource Border}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse x:Name="StatusDot" Width="8" Height="8"
+                                                     Fill="{DynamicResource AccentSrc}"
+                                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock FontSize="12" FontWeight="SemiBold"
+                                                       VerticalAlignment="Center">
+                                                <Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="{DynamicResource FgMuted}"/>
+                                                <Run Text="{Binding ItemCount, Mode=OneWay}"
+                                                     Foreground="{DynamicResource FgMuted}"/>
+                                                <Run Text=" objects)" Foreground="{DynamicResource FgMuted}"/>
+                                            </TextBlock>
+                                        </StackPanel>
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Source.LineKind}" Value="Added">
-                                                        <Setter Property="Background" Value="{StaticResource DiffAdded}"/>
+                                                    <DataTrigger Binding="{Binding Name}" Value="Only in Source">
+                                                        <Setter Property="Background" Value="{DynamicResource BgGroupSrc}"/>
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Name}" Value="Different">
+                                                        <Setter Property="Background" Value="{DynamicResource BgGroupDiff}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Name}" Value="Only in Target">
+                                                        <Setter Property="Background" Value="{DynamicResource BgGroupTgt}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Name}" Value="Identical">
+                                                        <Setter Property="Background" Value="{DynamicResource BgGroupEq}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Name}" Value="Only in Source">
+                                            <Setter TargetName="StatusDot" Property="Fill" Value="{DynamicResource AccentSrc}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Name}" Value="Different">
+                                            <Setter TargetName="StatusDot" Property="Fill" Value="{DynamicResource AccentDiff}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Name}" Value="Only in Target">
+                                            <Setter TargetName="StatusDot" Property="Fill" Value="{DynamicResource AccentTgt}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Name}" Value="Identical">
+                                            <Setter TargetName="StatusDot" Property="Fill" Value="{DynamicResource AccentEq}"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                </ListView>
+
+                <!-- ── GridSplitter ──────────────────────────────────────── -->
+                <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch" Cursor="SizeNS">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="GridSplitter">
+                            <Border Background="{DynamicResource BgHeader}">
+                                <Rectangle Height="2" Width="50"
+                                           Fill="{DynamicResource Border}"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"
+                                           RadiusX="1" RadiusY="1"/>
+                            </Border>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     DIFF PANEL  — DbForge-style bordered frame
+                     ══════════════════════════════════════════════════════════ -->
+                <Border Grid.Row="2"
+                        Margin="6,4,6,6"
+                        Background="{DynamicResource BgCodePane}"
+                        BorderBrush="{DynamicResource Border}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource RadiusMedium}">
+
+                    <!-- Blue top-accent bar (DbForge hallmark) -->
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="2"
+                                          Direction="270" Opacity="0.4"
+                                          Color="#000000"/>
+                    </Border.Effect>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <!-- Coloured top accent line -->
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Accent bar: gradient from source-green to target-red via blue -->
+                        <Border Grid.Row="0" CornerRadius="6,6,0,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#22C55E" Offset="0.0"/>
+                                    <GradientStop Color="#388BFD" Offset="0.5"/>
+                                    <GradientStop Color="#EF4444" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <!-- Inner panel content -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="195" MinWidth="120" MaxWidth="340"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- ── Object Tree ──────────────────────────── -->
+                            <DockPanel Grid.Column="0">
+                                <Border DockPanel.Dock="Top"
+                                        Background="{DynamicResource BgHeader}"
+                                        BorderBrush="{DynamicResource Border}"
+                                        BorderThickness="0,0,1,1" Padding="10,6">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="◈" FontSize="10"
+                                                   Foreground="{DynamicResource AccentPrimary}"
+                                                   Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Objects" FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource FgMuted}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Auto"
+                                              Background="{DynamicResource BgCodePane}">
+                                    <TreeView ItemsSource="{Binding DiffTree}"
+                                              Background="Transparent" BorderThickness="0"
+                                              Foreground="{DynamicResource FgPrimary}"
+                                              ItemContainerStyle="{StaticResource DiffTreeItemStyle}">
+                                        <TreeView.ItemTemplate>
+                                            <HierarchicalDataTemplate ItemsSource="{Binding Children}"
+                                                                      DataType="{x:Type vm:DiffTreeNode}">
+                                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                    <Ellipse Width="6" Height="6"
+                                                             VerticalAlignment="Center" Margin="0,0,5,0">
+                                                        <Ellipse.Style>
+                                                            <Style TargetType="Ellipse">
+                                                                <Setter Property="Fill" Value="{DynamicResource TreeIdentical}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DiffStatus}" Value="Added">
+                                                                        <Setter Property="Fill" Value="{DynamicResource TreeAdded}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding DiffStatus}" Value="Removed">
+                                                                        <Setter Property="Fill" Value="{DynamicResource TreeRemoved}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding DiffStatus}" Value="Modified">
+                                                                        <Setter Property="Fill" Value="{DynamicResource TreeModified}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Ellipse.Style>
+                                                    </Ellipse>
+                                                    <TextBlock Text="{Binding Icon}" FontSize="10"
+                                                               Margin="0,0,4,0" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource FgMuted}"/>
+                                                    <TextBlock Text="{Binding Label}" FontSize="11"
+                                                               FontFamily="Consolas" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource FgPrimary}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DiffStatus}" Value="Added">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource TreeAdded}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding DiffStatus}" Value="Removed">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource TreeRemoved}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding DiffStatus}" Value="Modified">
+                                                                        <Setter Property="Foreground" Value="{DynamicResource TreeModified}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </HierarchicalDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                    </TreeView>
+                                </ScrollViewer>
+                            </DockPanel>
+
+                            <GridSplitter Grid.Column="1" Width="5"
+                                          HorizontalAlignment="Stretch"
+                                          Background="{DynamicResource BgCodePane}"/>
+
+                            <!-- ── SOURCE pane ────────────────────────────── -->
+                            <DockPanel Grid.Column="2">
+                                <Border DockPanel.Dock="Top"
+                                        Background="{DynamicResource BgHeader}"
+                                        BorderBrush="{DynamicResource Border}"
+                                        BorderThickness="0,0,0,1" Padding="12,6">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal">
+                                            <!-- Green source indicator -->
+                                            <Border Width="3" Height="16" CornerRadius="1.5"
+                                                    Background="{DynamicResource ColorSuccess}"
+                                                    Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding SourcePaneHeader}"
+                                                       FontFamily="Consolas" FontSize="12"
+                                                       Foreground="{DynamicResource FgPrimary}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Style="{StaticResource CodeBtn}"
+                                                Content="⎘  Copy" Command="{Binding CopySourceCommand}"/>
+                                    </Grid>
+                                </Border>
+
+                                <ScrollViewer x:Name="SourceScroller"
+                                              VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding DiffPairs}"
+                                                  Background="{DynamicResource BgCodePane}"
+                                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                                  VirtualizingStackPanel.VirtualizationMode="Recycling">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:SqlDiffPair}">
+                                                <Border x:Name="CellBd" Margin="0,0,0,1"
+                                                        Background="{DynamicResource BgCodePane}"
+                                                        BorderThickness="0">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="22"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border x:Name="GutterBd"
+                                                                Background="{DynamicResource BgHeader}"
+                                                                BorderBrush="{DynamicResource BorderLight}"
+                                                                BorderThickness="0,0,1,0">
+                                                            <TextBlock x:Name="GutterTxt" Text=""
+                                                                       FontFamily="Consolas" FontSize="11"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource FgMuted}"/>
+                                                        </Border>
+                                                        <TextBlock Grid.Column="1"
+                                                                   x:Name="CodeTxt"
+                                                                   h:TextBlockHelper.HighlightKind="Source"
+                                                                   h:TextBlockHelper.Segments="{Binding Source.Segments}"
+                                                                   FontFamily="Consolas" FontSize="12"
+                                                                   Padding="8,2" VerticalAlignment="Center"
+                                                                   TextWrapping="NoWrap"
+                                                                   Foreground="{DynamicResource FgCode}"/>
+                                                    </Grid>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Source.LineKind}" Value="Added">
+                                                                    <Setter Property="Background" Value="{DynamicResource DiffAdded}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Source.LineKind}" Value="Removed">
+                                                                    <Setter Property="Background"  Value="{DynamicResource DiffRemoved}"/>
+                                                                    <Setter Property="BorderBrush"     Value="{DynamicResource FgRemoved}"/>
+                                                                    <Setter Property="BorderThickness" Value="2,0,0,0"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Source.LineKind}" Value="Modified">
+                                                                    <Setter Property="Background"  Value="{DynamicResource DiffModified}"/>
+                                                                    <Setter Property="BorderBrush"     Value="{DynamicResource FgModified}"/>
+                                                                    <Setter Property="BorderThickness" Value="2,0,0,0"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Source.LineKind}" Value="Empty">
+                                                                    <Setter Property="Background" Value="{DynamicResource DiffEmpty}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Source.LineKind}" Value="SectionHeader">
+                                                                    <Setter Property="Background" Value="{DynamicResource DiffSection}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <DataTemplate.Triggers>
                                                     <DataTrigger Binding="{Binding Source.LineKind}" Value="Removed">
-                                                        <Setter Property="Background" Value="{StaticResource DiffRemoved}"/>
+                                                        <Setter TargetName="GutterTxt" Property="Text"      Value="−"/>
+                                                        <Setter TargetName="GutterTxt" Property="Foreground" Value="{DynamicResource FgRemoved}"/>
+                                                        <Setter TargetName="GutterBd"  Property="Background" Value="{DynamicResource BgError}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Source.LineKind}" Value="Added">
+                                                        <Setter TargetName="GutterTxt" Property="Text"      Value="+"/>
+                                                        <Setter TargetName="GutterTxt" Property="Foreground" Value="{DynamicResource FgAdded}"/>
+                                                        <Setter TargetName="GutterBd"  Property="Background" Value="{DynamicResource BgSuccess}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Source.LineKind}" Value="Modified">
-                                                        <!-- subtle amber tint on the line; tokens carry the strong highlight -->
-                                                        <Setter Property="Background" Value="{StaticResource DiffModified}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Source.LineKind}" Value="Empty">
-                                                        <Setter Property="Background" Value="{StaticResource DiffEmpty}"/>
+                                                        <Setter TargetName="GutterTxt" Property="Text"      Value="~"/>
+                                                        <Setter TargetName="GutterTxt" Property="Foreground" Value="{DynamicResource FgModified}"/>
+                                                        <Setter TargetName="GutterBd"  Property="Background" Value="{DynamicResource BgWarning}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Source.LineKind}" Value="SectionHeader">
-                                                        <Setter Property="Background" Value="{StaticResource DiffSection}"/>
+                                                        <Setter TargetName="CodeTxt" Property="Foreground" Value="{DynamicResource FgSection}"/>
+                                                        <Setter TargetName="CodeTxt" Property="FontStyle"  Value="Italic"/>
                                                     </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </DockPanel>
 
-                                    <!-- Per-element adjustments -->
-                                    <DataTemplate.Triggers>
+                            <GridSplitter Grid.Column="3" Width="5"
+                                          HorizontalAlignment="Stretch"
+                                          Background="{DynamicResource BgCodePane}"/>
 
-                                        <!-- ── Removed (source only, full red line) ── -->
-                                        <DataTrigger Binding="{Binding Source.LineKind}" Value="Removed">
-                                            <Setter TargetName="GutterTxt"  Property="Text"       Value="−"/>
-                                            <Setter TargetName="GutterTxt"  Property="Foreground"  Value="{StaticResource FgRemoved}"/>
-                                            <Setter TargetName="GutterBd"   Property="Background"  Value="#3D1515"/>
-                                            <!-- Text colour change is fine for Removed: the whole line is absent -->
-                                            <!--<Setter TargetName="CodeTxt"    Property="Foreground"  Value="{StaticResource FgRemoved}"/>-->
-                                        </DataTrigger>
+                            <!-- ── TARGET pane ────────────────────────────── -->
+                            <DockPanel Grid.Column="4">
+                                <Border DockPanel.Dock="Top"
+                                        Background="{DynamicResource BgHeader}"
+                                        BorderBrush="{DynamicResource Border}"
+                                        BorderThickness="1,0,0,1" Padding="12,6">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Orientation="Horizontal">
+                                            <!-- Red target indicator -->
+                                            <Border Width="3" Height="16" CornerRadius="1.5"
+                                                    Background="{DynamicResource ColorError}"
+                                                    Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding TargetPaneHeader}"
+                                                       FontFamily="Consolas" FontSize="12"
+                                                       Foreground="{DynamicResource FgPrimary}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Style="{StaticResource CodeBtn}"
+                                                Content="⎘  Copy" Command="{Binding CopyTargetCommand}"/>
+                                    </Grid>
+                                </Border>
 
-                                        <!-- ── Added (in source pane this means a blank placeholder) ── -->
-                                        <DataTrigger Binding="{Binding Source.LineKind}" Value="Added">
-                                            <Setter TargetName="GutterTxt"  Property="Text"       Value="+"/>
-                                            <Setter TargetName="GutterTxt"  Property="Foreground"  Value="{StaticResource FgAdded}"/>
-                                            <Setter TargetName="GutterBd"   Property="Background"  Value="#1A3A22"/>
-                                            <!--<Setter TargetName="CodeTxt"    Property="Foreground"  Value="{StaticResource FgAdded}"/>-->
-                                        </DataTrigger>
-
-                                        <!--
-                                            ── Modified (rename / property change) ──────────────────
-                                            Gutter shows amber ~.
-                                            TEXT COLOUR IS NOT CHANGED — keep FgCode so only the
-                                            inline segment backgrounds draw the eye to what changed.
-                                        -->
-                                        <DataTrigger Binding="{Binding Source.LineKind}" Value="Modified">
-                                            <Setter TargetName="GutterTxt"  Property="Text"       Value="~"/>
-                                            <Setter TargetName="GutterTxt"  Property="Foreground"  Value="{StaticResource FgModified}"/>
-                                            <Setter TargetName="GutterBd"   Property="Background"  Value="#2A2000"/>
-                                            <!-- intentionally no Setter for CodeTxt.Foreground -->
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding Source.LineKind}" Value="Empty">
-                                            <Setter TargetName="GutterTxt"  Property="Text"       Value=""/>
-                                            <Setter TargetName="GutterBd"   Property="Background"  Value="#0D1117"/>
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding Source.LineKind}" Value="SectionHeader">
-                                            <Setter TargetName="GutterTxt"  Property="Text"       Value=""/>
-                                            <Setter TargetName="CodeTxt"    Property="Foreground"  Value="{StaticResource FgSection}"/>
-                                            <Setter TargetName="CodeTxt"    Property="FontStyle"   Value="Italic"/>
-                                        </DataTrigger>
-
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </DockPanel>
-
-                <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Stretch" Background="#0D1117"/>
-
-                <!-- ══════════════════════════════════════════════════════ -->
-                <!-- TARGET diff pane                                        -->
-                <!-- ══════════════════════════════════════════════════════ -->
-                <DockPanel Grid.Column="4" Background="{StaticResource BgCodePane}">
-                    <Border DockPanel.Dock="Top" Background="#141824"
-                            BorderBrush="{StaticResource Border}" BorderThickness="1,0,0,1" Padding="12,6">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="10" Height="10" CornerRadius="2"
-                                        Background="#EF4444" Margin="0,0,7,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding TargetPaneHeader}"
-                                           FontFamily="Consolas" FontSize="12"
-                                           Foreground="{StaticResource FgPrimary}" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <Button Grid.Column="1" Style="{StaticResource CodeBtn}"
-                                    Content="⎘  Copy" Command="{Binding CopyTargetCommand}"/>
-                        </Grid>
-                    </Border>
-
-                    <ScrollViewer x:Name="TargetScroller" DockPanel.Dock="Bottom"
-                                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding DiffPairs}"
-                                      Background="{StaticResource BgCodePane}"
-                                      VirtualizingStackPanel.IsVirtualizing="True"
-                                      VirtualizingStackPanel.VirtualizationMode="Recycling">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:SqlDiffPair}">
-                                    <Border x:Name="CellBd"
-                                            Background="{StaticResource BgCodePane}"
-                                            BorderThickness="0" MinHeight="20">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="22"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <Border x:Name="GutterBd" Background="#161B27"
-                                                    BorderBrush="#21262D" BorderThickness="0,0,1,0">
-                                                <TextBlock x:Name="GutterTxt" Text=""
-                                                           FontFamily="Consolas" FontSize="11"
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="#4B5563"/>
-                                            </Border>
-
-                                            <!--
-                                                HighlightKind="Target" → changed tokens get deep-green
-                                                background (#1A4A22).
-                                            -->
-                                            <TextBlock Grid.Column="1"
-                                                       x:Name="CodeTxt"
-                                                       h:TextBlockHelper.HighlightKind="Target"
-                                                       h:TextBlockHelper.Segments="{Binding Target.Segments}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12"
-                                                       Padding="8,2"
-                                                       VerticalAlignment="Center"
-                                                       TextWrapping="NoWrap"
-                                                       Foreground="{StaticResource FgCode}"/>
-                                        </Grid>
-
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
+                                <ScrollViewer x:Name="TargetScroller"
+                                              VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding DiffPairs}"
+                                                  Background="{DynamicResource BgCodePane}"
+                                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                                  VirtualizingStackPanel.VirtualizationMode="Recycling">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:SqlDiffPair}">
+                                                <Border x:Name="CellBd" Margin="0,0,0,1"
+                                                        Background="{DynamicResource BgCodePane}"
+                                                        BorderThickness="0" MinHeight="20">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="22"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border x:Name="GutterBd"
+                                                                Background="{DynamicResource BgHeader}"
+                                                                BorderBrush="{DynamicResource BorderLight}"
+                                                                BorderThickness="0,0,1,0">
+                                                            <TextBlock x:Name="GutterTxt" Text=""
+                                                                       FontFamily="Consolas" FontSize="11"
+                                                                       HorizontalAlignment="Center"
+                                                                       VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource FgMuted}"/>
+                                                        </Border>
+                                                        <TextBlock Grid.Column="1"
+                                                                   x:Name="CodeTxt"
+                                                                   h:TextBlockHelper.HighlightKind="Target"
+                                                                   h:TextBlockHelper.Segments="{Binding Target.Segments}"
+                                                                   FontFamily="Consolas" FontSize="12"
+                                                                   Padding="8,2" VerticalAlignment="Center"
+                                                                   TextWrapping="NoWrap"
+                                                                   Foreground="{DynamicResource FgCode}"/>
+                                                    </Grid>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="BorderThickness" Value="0"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Target.LineKind}" Value="Added">
+                                                                    <Setter Property="Background"  Value="{DynamicResource DiffAdded}"/>
+                                                                    <Setter Property="BorderBrush"     Value="{DynamicResource FgAdded}"/>
+                                                                    <Setter Property="BorderThickness" Value="2,0,0,0"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Target.LineKind}" Value="Removed">
+                                                                    <Setter Property="Background" Value="{DynamicResource DiffRemoved}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Target.LineKind}" Value="Modified">
+                                                                    <Setter Property="Background"  Value="{DynamicResource DiffModified}"/>
+                                                                    <Setter Property="BorderBrush"     Value="{DynamicResource FgModified}"/>
+                                                                    <Setter Property="BorderThickness" Value="2,0,0,0"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Target.LineKind}" Value="Empty">
+                                                                    <Setter Property="Background" Value="{DynamicResource DiffEmpty}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Target.LineKind}" Value="SectionHeader">
+                                                                    <Setter Property="Background" Value="{DynamicResource DiffSection}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <DataTemplate.Triggers>
                                                     <DataTrigger Binding="{Binding Target.LineKind}" Value="Added">
-                                                        <Setter Property="Background" Value="{StaticResource DiffAdded}"/>
+                                                        <Setter TargetName="GutterTxt" Property="Text"      Value="+"/>
+                                                        <Setter TargetName="GutterTxt" Property="Foreground" Value="{DynamicResource FgAdded}"/>
+                                                        <Setter TargetName="GutterBd"  Property="Background" Value="{DynamicResource BgSuccess}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Target.LineKind}" Value="Removed">
-                                                        <Setter Property="Background" Value="{StaticResource DiffRemoved}"/>
+                                                        <Setter TargetName="GutterTxt" Property="Text"      Value="−"/>
+                                                        <Setter TargetName="GutterTxt" Property="Foreground" Value="{DynamicResource FgRemoved}"/>
+                                                        <Setter TargetName="GutterBd"  Property="Background" Value="{DynamicResource BgError}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Target.LineKind}" Value="Modified">
-                                                        <Setter Property="Background" Value="{StaticResource DiffModified}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Target.LineKind}" Value="Empty">
-                                                        <Setter Property="Background" Value="{StaticResource DiffEmpty}"/>
+                                                        <Setter TargetName="GutterTxt" Property="Text"      Value="~"/>
+                                                        <Setter TargetName="GutterTxt" Property="Foreground" Value="{DynamicResource FgModified}"/>
+                                                        <Setter TargetName="GutterBd"  Property="Background" Value="{DynamicResource BgWarning}"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Target.LineKind}" Value="SectionHeader">
-                                                        <Setter Property="Background" Value="{StaticResource DiffSection}"/>
+                                                        <Setter TargetName="CodeTxt" Property="Foreground" Value="{DynamicResource FgSection}"/>
+                                                        <Setter TargetName="CodeTxt" Property="FontStyle"  Value="Italic"/>
                                                     </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                    </Border>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </DockPanel>
 
-                                    <DataTemplate.Triggers>
-
-                                        <DataTrigger Binding="{Binding Target.LineKind}" Value="Added">
-                                            <Setter TargetName="GutterTxt" Property="Text"       Value="+"/>
-                                            <Setter TargetName="GutterTxt" Property="Foreground"  Value="{StaticResource FgAdded}"/>
-                                            <Setter TargetName="GutterBd"  Property="Background"  Value="#1A3A22"/>
-                                            <!--<Setter TargetName="CodeTxt"   Property="Foreground"  Value="{StaticResource FgAdded}"/>-->
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding Target.LineKind}" Value="Removed">
-                                            <Setter TargetName="GutterTxt" Property="Text"       Value="−"/>
-                                            <Setter TargetName="GutterTxt" Property="Foreground"  Value="{StaticResource FgRemoved}"/>
-                                            <Setter TargetName="GutterBd"  Property="Background"  Value="#3D1515"/>
-                                            <!--<Setter TargetName="CodeTxt"   Property="Foreground"  Value="{StaticResource FgRemoved}"/>-->
-                                        </DataTrigger>
-
-                                        <!--
-                                            Modified: amber ~ in gutter, NO text-colour change,
-                                            inline green token backgrounds show what was added.
-                                        -->
-                                        <DataTrigger Binding="{Binding Target.LineKind}" Value="Modified">
-                                            <Setter TargetName="GutterTxt" Property="Text"       Value="~"/>
-                                            <Setter TargetName="GutterTxt" Property="Foreground"  Value="{StaticResource FgModified}"/>
-                                            <Setter TargetName="GutterBd"  Property="Background"  Value="#2A2000"/>
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding Target.LineKind}" Value="Empty">
-                                            <Setter TargetName="GutterTxt" Property="Text"       Value=""/>
-                                            <Setter TargetName="GutterBd"  Property="Background"  Value="#0D1117"/>
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding Target.LineKind}" Value="SectionHeader">
-                                            <Setter TargetName="GutterTxt" Property="Text"       Value=""/>
-                                            <Setter TargetName="CodeTxt"   Property="Foreground"  Value="{StaticResource FgSection}"/>
-                                            <Setter TargetName="CodeTxt"   Property="FontStyle"   Value="Italic"/>
-                                        </DataTrigger>
-
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </DockPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+                <!-- end diff panel border -->
 
             </Grid>
+        </DockPanel>
+
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <!-- BUSY OVERLAY  (shown during refresh)                              -->
+        <!-- ══════════════════════════════════════════════════════════════════ -->
+        <Grid Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+            <Border Background="#AA000000"/>
+            <Border Background="{DynamicResource BgCard}"
+                    BorderBrush="{DynamicResource AccentPrimary}"
+                    BorderThickness="1"
+                    CornerRadius="{DynamicResource RadiusMedium}"
+                    Padding="32,20"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="⟳  Refreshing comparison…"
+                               FontSize="15" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentPrimary}"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding StatusText}"
+                               FontSize="12" Margin="0,8,0,0"
+                               Foreground="{DynamicResource FgSecondary}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
         </Grid>
-    </DockPanel>
+
+    </Grid>
 </Window>

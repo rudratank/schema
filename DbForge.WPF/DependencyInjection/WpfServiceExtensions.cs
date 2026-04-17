@@ -1,5 +1,7 @@
-﻿using DbForge.WPF.ViewModels;
+﻿using DbForge.WPF.Services;
+using DbForge.WPF.ViewModels;
 using DbForge.WPF.ViewModels.Compare;
+using DbForge.WPF.ViewModels.Settings;
 using DbForge.WPF.Views;
 using DbForge.WPF.Views.Compare;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +11,13 @@ namespace DbForge.WPF.DependencyInjection;
 public static class WpfServiceExtensions
 {
     public static IServiceCollection AddDbForgeWpf ( this IServiceCollection services )
+
     {
+        // ── Settings & Theme Services ────────────────────────────────
+        services.AddSingleton<IAppSettings, AppSettingsService>();
+        services.AddTransient<SettingsWindow>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddSingleton<ThemeService>();
         // Windows
         services.AddSingleton<MainWindow>();
 

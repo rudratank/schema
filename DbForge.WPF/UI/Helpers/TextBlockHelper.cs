@@ -6,9 +6,33 @@ using System.Windows.Media;
 
 namespace DbForge.WPF.UI.Helpers
 {
-
+    /// <summary>
+    /// Attached behaviour that renders a list of <see cref="DiffSegment"/> objects
+    /// as inline Runs inside a TextBlock, with optional background highlights for
+    /// changed tokens.
+    ///
+    /// Usage in XAML
+    /// ─────────────
+    ///   helpers:TextBlockHelper.HighlightKind="Source"
+    ///   helpers:TextBlockHelper.Segments="{Binding Source.Segments}"
+    ///
+    /// Source → amber/red background for removed tokens.
+    /// Target → green background for added tokens.
+    /// </summary>
     public static class TextBlockHelper
     {
+        // ── Static brushes — allocated once, not per-rebuild ──────────────────
+        // Delete (Source)
+
+        private static readonly SolidColorBrush SourceHighlightBrush =
+            Frozen(new SolidColorBrush(Color.FromArgb(90, 255, 80, 80)));
+
+        // Add (Target)
+        private static readonly SolidColorBrush TargetHighlightBrush =
+            Frozen(new SolidColorBrush(Color.FromArgb(90, 80, 255, 120))); // deep green
+
+        private static SolidColorBrush Frozen ( SolidColorBrush b ) { b.Freeze(); return b; }
+
         // ── "Source" or "Target" ─────────────────────────────────────────────
         public static readonly DependencyProperty HighlightKindProperty =
             DependencyProperty.RegisterAttached(
@@ -47,12 +71,9 @@ namespace DbForge.WPF.UI.Helpers
             var segs = GetSegments(tb);
             if ( segs == null || segs.Count == 0 ) return;
 
-            // Source highlighted tokens: deep amber/red  → "this was removed here"
-            // Target highlighted tokens: deep green      → "this is what replaced it"
-            var kind = GetHighlightKind(tb);
-            var hlBrush = kind == "Target"
-                ? new SolidColorBrush(Color.FromRgb(0x1A, 0x4A, 0x22))  // #1A4A22 deep green
-                : new SolidColorBrush(Color.FromRgb(0x5C, 0x28, 0x00));  // #5C2800 deep amber
+            var hlBrush = GetHighlightKind(tb) == "Target"
+                ? TargetHighlightBrush
+                : SourceHighlightBrush;
 
             foreach ( var seg in segs )
             {

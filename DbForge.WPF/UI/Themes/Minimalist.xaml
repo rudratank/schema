@@ -1,0 +1,102 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MINIMALIST THEME  —  DbForge Professional
+         Warm off-white paper. Zero saturation. Ink on linen.
+    ═══════════════════════════════════════════════════════════════ -->
+
+    <SolidColorBrush x:Key="BgApp"         Color="#F5F2EE"/>
+    <SolidColorBrush x:Key="BgPanel"       Color="#FAF8F5"/>
+    <SolidColorBrush x:Key="BgHeader"      Color="#F0EDE8"/>
+    <SolidColorBrush x:Key="BgRow"         Color="#FAF8F5"/>
+    <SolidColorBrush x:Key="BgRowAlt"      Color="#F5F2EE"/>
+    <SolidColorBrush x:Key="BgRowHover"    Color="#EDE9E3"/>
+    <SolidColorBrush x:Key="BgRowSel"      Color="#E3DED6"/>
+    <SolidColorBrush x:Key="BgColHeader"   Color="#F0EDE8"/>
+    <SolidColorBrush x:Key="BgCodePane"    Color="#FDFCFA"/>
+    <SolidColorBrush x:Key="BgInput"       Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BgCard"        Color="#FAF8F5"/>
+    <SolidColorBrush x:Key="BgTooltip"     Color="#2A2520"/>
+    <SolidColorBrush x:Key="BgSidebar"     Color="#F0EDE8"/>
+    <SolidColorBrush x:Key="BgDialog"      Color="#FAF8F5"/>
+
+    <SolidColorBrush x:Key="FgPrimary"     Color="#1A1612"/>
+    <SolidColorBrush x:Key="FgSecondary"   Color="#5A534A"/>
+    <SolidColorBrush x:Key="FgMuted"       Color="#9A9088"/>
+    <SolidColorBrush x:Key="FgCode"        Color="#1A1612"/>
+    <SolidColorBrush x:Key="FgLink"        Color="#3A3028"/>
+    <SolidColorBrush x:Key="FgInverse"     Color="#FAF8F5"/>
+
+    <SolidColorBrush x:Key="Border"        Color="#D6D0C8"/>
+    <SolidColorBrush x:Key="BorderLight"   Color="#E3DED6"/>
+    <SolidColorBrush x:Key="BorderFocus"   Color="#5A534A"/>
+    <SolidColorBrush x:Key="BorderInput"   Color="#C8C0B5"/>
+
+    <SolidColorBrush x:Key="AccentPrimary"   Color="#3A3028"/>
+    <SolidColorBrush x:Key="AccentSecondary" Color="#2A2520"/>
+    <SolidColorBrush x:Key="AccentHover"     Color="#5A534A"/>
+
+    <SolidColorBrush x:Key="ColorSuccess"  Color="#2D6A2D"/>
+    <SolidColorBrush x:Key="ColorWarning"  Color="#8A6000"/>
+    <SolidColorBrush x:Key="ColorError"    Color="#8A2020"/>
+    <SolidColorBrush x:Key="ColorInfo"     Color="#205080"/>
+    <SolidColorBrush x:Key="BgSuccess"     Color="#EBF4EB"/>
+    <SolidColorBrush x:Key="BgWarning"     Color="#FBF4E0"/>
+    <SolidColorBrush x:Key="BgError"       Color="#F4EBEB"/>
+    <SolidColorBrush x:Key="BgInfo"        Color="#EBF0F8"/>
+
+    <SolidColorBrush x:Key="BtnPrimaryBg"    Color="#2A2520"/>
+    <SolidColorBrush x:Key="BtnPrimaryFg"    Color="#FAF8F5"/>
+    <SolidColorBrush x:Key="BtnPrimaryBorder" Color="#1A1612"/>
+    <SolidColorBrush x:Key="BtnDefaultBg"    Color="#F5F2EE"/>
+    <SolidColorBrush x:Key="BtnDefaultFg"    Color="#1A1612"/>
+    <SolidColorBrush x:Key="BtnDefaultBorder" Color="#C8C0B5"/>
+    <SolidColorBrush x:Key="BtnDangerBg"     Color="#8A2020"/>
+    <SolidColorBrush x:Key="BtnDangerFg"     Color="#FAF8F5"/>
+
+    <SolidColorBrush x:Key="DiffAdded"     Color="#EBF4EB"/>
+    <SolidColorBrush x:Key="DiffRemoved"   Color="#F4EBEB"/>
+    <SolidColorBrush x:Key="DiffModified"  Color="#FBF4E0"/>
+    <SolidColorBrush x:Key="DiffEmpty"     Color="#F5F2EE"/>
+    <SolidColorBrush x:Key="DiffSection"   Color="#EDE9E3"/>
+    <SolidColorBrush x:Key="FgAdded"       Color="#2D6A2D"/>
+    <SolidColorBrush x:Key="FgRemoved"     Color="#8A2020"/>
+    <SolidColorBrush x:Key="FgModified"    Color="#8A6000"/>
+    <SolidColorBrush x:Key="FgSection"     Color="#9A9088"/>
+    <SolidColorBrush x:Key="GutterAdded"   Color="#2D6A2D"/>
+    <SolidColorBrush x:Key="GutterRemoved" Color="#8A2020"/>
+    <SolidColorBrush x:Key="GutterContext" Color="#D6D0C8"/>
+
+    <SolidColorBrush x:Key="BgGroupSrc"    Color="#FBF4E0"/>
+    <SolidColorBrush x:Key="AccentSrc"     Color="#8A6000"/>
+    <SolidColorBrush x:Key="BgGroupDiff"   Color="#EBF0F8"/>
+    <SolidColorBrush x:Key="AccentDiff"    Color="#205080"/>
+    <SolidColorBrush x:Key="BgGroupTgt"    Color="#F4EBEB"/>
+    <SolidColorBrush x:Key="AccentTgt"     Color="#8A2020"/>
+    <SolidColorBrush x:Key="BgGroupEq"     Color="#F5F2EE"/>
+    <SolidColorBrush x:Key="AccentEq"      Color="#9A9088"/>
+
+    <SolidColorBrush x:Key="TreeAdded"     Color="#2D6A2D"/>
+    <SolidColorBrush x:Key="TreeRemoved"   Color="#8A2020"/>
+    <SolidColorBrush x:Key="TreeModified"  Color="#205080"/>
+    <SolidColorBrush x:Key="TreeIdentical" Color="#9A9088"/>
+
+    <SolidColorBrush x:Key="OpCreate"      Color="#2D6A2D"/>
+    <SolidColorBrush x:Key="OpUpdate"      Color="#205080"/>
+    <SolidColorBrush x:Key="OpDrop"        Color="#8A2020"/>
+    <SolidColorBrush x:Key="OpEqual"       Color="#9A9088"/>
+
+    <SolidColorBrush x:Key="ScrollBarThumb"  Color="#C8C0B5"/>
+    <SolidColorBrush x:Key="ScrollBarTrack"  Color="#F5F2EE"/>
+
+    <CornerRadius  x:Key="RadiusSmall"   >2</CornerRadius>
+    <CornerRadius  x:Key="RadiusMedium"  >4</CornerRadius>
+    <CornerRadius  x:Key="RadiusLarge"   >8</CornerRadius>
+    <Thickness     x:Key="BorderThin"    >1</Thickness>
+    <sys:Double x:Key="FontSizeBase">13</sys:Double>
+    <sys:Double x:Key="FontSizeSmall">11</sys:Double>
+    <sys:Double x:Key="FontSizeLarge">16</sys:Double>
+
+</ResourceDictionary>

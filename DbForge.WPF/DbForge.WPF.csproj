@@ -9,14 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="ViewModels\NewFolder\**" />
-	  <EmbeddedResource Remove="ViewModels\NewFolder\**" />
-	  <None Remove="ViewModels\NewFolder\**" />
-	  <Page Remove="ViewModels\NewFolder\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Services\" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.36">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>

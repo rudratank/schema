@@ -4,7 +4,9 @@
         Title="Schema Compare — Setup"
         Width="860" SizeToContent="Height"
         ResizeMode="CanResizeWithGrip"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource BgApp}"
+        >
 
     <Window.Resources>
         <ResourceDictionary>
@@ -14,11 +16,11 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <DockPanel>
+    <DockPanel Background="{DynamicResource BgApp}">
 
         <!-- Footer ──────────────────────────────────────────────────────────── -->
         <Border DockPanel.Dock="Bottom"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                 BorderBrush="{DynamicResource Border}"
                 BorderThickness="0,1,0,0" Padding="12,8">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Compare"
@@ -32,7 +34,7 @@
         </Border>
 
         <!-- Source | VS | Target ───────────────────────────────────────────── -->
-        <Grid>
+        <Grid Background="{DynamicResource BgPanel}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -48,7 +50,8 @@
                        VerticalAlignment="Center"
                        FontWeight="Bold"
                        FontSize="16"
-                       Margin="12,0"/>
+                       Margin="12,0"
+                       Foreground="{DynamicResource FgMuted}"/>
 
             <ContentPresenter Grid.Column="2"
                               Content="{Binding Target}"

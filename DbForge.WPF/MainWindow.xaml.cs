@@ -5,50 +5,71 @@ using DbForge.WPF.Views.Compare;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
-namespace DbForge.WPF;
-
-public partial class MainWindow : Window
+namespace DbForge.WPF
 {
-    private readonly MainViewModel _vm;
-
-    public MainWindow ( MainViewModel vm )
+    /// <summary>
+    /// Main application window with connection management and theme support.
+    /// </summary>
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        _vm = vm;
-        DataContext = vm;
-    }
+        private readonly MainViewModel _vm;
 
-    protected override void OnContentRendered ( EventArgs e )
-    {
-        base.OnContentRendered(e);
-        OpenConnectionDialog();
-    }
+        public MainWindow ( MainViewModel vm )
+        {
+            InitializeComponent();
+            _vm = vm;
+            DataContext = vm;
+        }
 
-    private void NewConnection_Click ( object sender, RoutedEventArgs e )
-        => OpenConnectionDialog();
+        protected override void OnContentRendered ( EventArgs e )
+        {
+            base.OnContentRendered(e);
+            OpenConnectionDialog();
+        }
 
-    private void OpenConnectionDialog ()
-    {
-        var dialog = App.Services.GetRequiredService<ConnectionDialog>();
-        dialog.Owner = this;
-        if ( dialog.ShowDialog() == true && dialog.ViewModel.Result is { } server )
-            _vm.AddServer(server);
-    }
+        /// <summary>
+        /// Open a new connection dialog.
+        /// </summary>
+        private void NewConnection_Click ( object sender, RoutedEventArgs e )
+            => OpenConnectionDialog();
 
-    private void Exit_Click ( object sender, RoutedEventArgs e )
-        => Application.Current.Shutdown();
+        private void OpenConnectionDialog ()
+        {
+            var dialog = App.Services.GetRequiredService<ConnectionDialog>();
+            dialog.Owner = this;
+            if ( dialog.ShowDialog() == true && dialog.ViewModel.Result is { } server )
+                _vm.AddServer(server);
+        }
 
-    private void SchemaCompare_Click ( object sender, RoutedEventArgs e )
-        => OpenCompareSetup(preselectedProfile: null);
+        /// <summary>
+        /// Exit the application.
+        /// </summary>
+        private void Exit_Click ( object sender, RoutedEventArgs e )
+            => Application.Current.Shutdown();
 
-    private void OpenCompareSetup ( ConnectionProfile? preselectedProfile )
-    {
-        var setupDialog = App.Services.GetRequiredService<CompareSetupWindow>();
-        setupDialog.Owner = this;
+        /// <summary>
+        /// Open the Schema Compare tool.
+        /// </summary>
+        private void SchemaCompare_Click ( object sender, RoutedEventArgs e )
+            => OpenCompareSetup(preselectedProfile: null);
 
-        if ( preselectedProfile != null )
-            setupDialog.ViewModel.Source.SetFrom(preselectedProfile);
+        private void OpenCompareSetup ( ConnectionProfile? preselectedProfile )
+        {
+            var setupWindow = App.Services.GetRequiredService<CompareSetupWindow>();
+            setupWindow.Owner = this;
+            if ( preselectedProfile != null )
+                setupWindow.ViewModel.Source.SetFrom(preselectedProfile);
+            setupWindow.ShowDialog();
+        }
 
-        if ( setupDialog.ShowDialog() != true ) return;
+        /// <summary>
+        /// Open the Settings window for theme and preferences configuration.
+        /// </summary>
+        private void Settings_Click ( object sender, RoutedEventArgs e )
+        {
+            var settingsWindow = App.Services.GetRequiredService<SettingsWindow>();
+            settingsWindow.Owner = this;
+            settingsWindow.ShowDialog();
+        }
     }
 }

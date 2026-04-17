@@ -1,4 +1,4 @@
-﻿using DbForge.Core.Schema;                  // CompareExecutionResult, CompareProgressEvent
+﻿using DbForge.Core.Schema;
 using DbForge.WPF.UI.Converters;
 using DbForge.WPF.ViewModels.Base;
 using DbForge.WPF.Windows.Commands;
@@ -13,6 +13,13 @@ public class CompareSetupViewModel : BaseViewModel
 
     private readonly SchemaCompareEngine _schemaCompareEngine;
     private CancellationTokenSource? _cts;
+
+    // ── Single, correctly-typed event ────────────────────────────────────────
+    // BUG FIX: was declared twice — once as Action<CompareCompletedArgs> and
+    // once as Action<CompareExecutionResult>, causing a compile error.
+    // BUG FIX: CompareCompletedArgs record is now defined only in
+    // CompareResultViewModel (shared across both VMs via same namespace).
+    public event Action<CompareCompletedArgs>? CompareCompleted;
 
     public CompareSetupViewModel (
         ConnectionSideViewModel source,
@@ -35,10 +42,7 @@ public class CompareSetupViewModel : BaseViewModel
 
     public ICommand CompareCommand { get; }
 
-    // CompareExecutionResult already carries SourceSchema + TargetSchema —
-    // the window reads them directly from the result, no need to store them here.
-    public event Action<CompareExecutionResult>? CompareCompleted;
-
+    // ── Busy state ────────────────────────────────────────────────────────────
     private bool _isBusy;
     public bool IsBusy
     {
@@ -56,6 +60,10 @@ public class CompareSetupViewModel : BaseViewModel
         get => _statusMessage;
         set => Set(ref _statusMessage, value);
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // COMPARE
+    // ════════════════════════════════════════════════════════════════════════
 
     private async Task CompareAsync ()
     {
@@ -84,7 +92,9 @@ public class CompareSetupViewModel : BaseViewModel
                 progress,
                 _cts.Token);
 
-            CompareCompleted?.Invoke(execution);
+            // BUG FIX: was Invoke(execution) — wrong type.
+            // Now fires the full CompareCompletedArgs so subscribers get the profiles too.
+            CompareCompleted?.Invoke(new CompareCompletedArgs(execution, sourceProfile, targetProfile));
         }
         catch ( Exception ex )
         {

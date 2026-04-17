@@ -1,4 +1,5 @@
-﻿using DbForge.WPF.UI.Converters;
+﻿using DbForge.Core.Schema;
+using DbForge.WPF.UI.Converters;
 using DbForge.WPF.ViewModels.Compare;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -15,18 +16,26 @@ public partial class CompareSetupWindow : Window
         ViewModel = vm;
         DataContext = vm;
 
-        vm.CompareCompleted += result =>
+        vm.CompareCompleted += args =>
         {
-            // result.SourceSchema and result.TargetSchema were extracted
-            // inside SchemaCompareEngine.CompareAsync — use them directly.
+            // Build the result VM from the completed execution
             var resultVm = CompareResultMapper.ToViewModel(
-                result.Result,
-                result.SourceSchema,
-                result.TargetSchema);
+                args.Execution.Result,
+                args.Execution.SourceSchema,
+                args.Execution.TargetSchema);
 
-            var window = App.Services.GetRequiredService<CompareResultWindow>();
-            window.DataContext = resultVm;
-            window.Show();
+            // Give the result VM everything it needs to self-refresh
+            resultVm.SetRefreshContext(
+                App.Services.GetRequiredService<SchemaCompareEngine>(),
+                args.SourceProfile,
+                args.TargetProfile);
+
+            var resultWindow = App.Services.GetRequiredService<CompareResultWindow>();
+            resultWindow.DataContext = resultVm;
+            resultWindow.Owner = Owner;
+            resultWindow.Show();
+
+            DialogResult = true;
             Close();
         };
     }

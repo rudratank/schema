@@ -9,12 +9,17 @@ namespace DbForge.Core.Models.Schema
         public ProviderType ProviderType { get; set; }
         public DateTime ExtractedAt { get; set; } = DateTime.UtcNow;
 
+        // ── Existing ─────────────────────────────────────────────────────────
         public List<TableDefinition> Tables { get; set; } = new();
-        //public List<ViewDefinition> Views { get; set; } = new();
-        //public List<ProcedureDefinition> Procedures { get; set; } = new();
-        //public List<FunctionDefinition> Functions { get; set; } = new();
+        public List<ProcedureDefinition> Procedures { get; set; } = new();
 
-        // Helper — find a table by name quickly
+        // ── NEW ───────────────────────────────────────────────────────────────
+        public List<ViewDefinition> Views { get; set; } = new();
+        public List<FunctionDefinition> Functions { get; set; } = new();
+        public List<TriggerDefinition> Triggers { get; set; } = new();
+        public List<SynonymDefinition> Synonyms { get; set; } = new();
+
+        // ── Helpers ───────────────────────────────────────────────────────────
         public TableDefinition? GetTable ( string name ) =>
             Tables.FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
     }

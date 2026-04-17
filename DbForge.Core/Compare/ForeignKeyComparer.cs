@@ -4,94 +4,105 @@ using DbForge.Core.Models.Schema;
 
 namespace DbForge.Core.Compare
 {
+    /// <summary>
+    /// Compares foreign keys between two versions of the same table.
+    ///
+    /// Checks for:
+    ///   • Added / Removed FKs (by constraint name)
+    ///   • Modified FKs: column mapping, referenced table, referenced columns,
+    ///     ON DELETE rule, ON UPDATE rule
+    ///
+    /// Note: FK names are the primary key. If the same logical relationship exists
+    /// under a different constraint name, it will appear as Removed + Added, not
+    /// Modified. Rename detection for FKs is intentionally omitted — constraint
+    /// names are not semantic and renaming tools handle that separately.
+    /// </summary>
     public class ForeignKeyComparer
     {
         public List<DiffItem> Compare ( TableDefinition source, TableDefinition target )
         {
             var diffs = new List<DiffItem>();
 
-            var sourceFks = source.ForeignKeys.ToDictionary(f => f.Name, StringComparer.OrdinalIgnoreCase);
-            var targetFks = target.ForeignKeys.ToDictionary(f => f.Name, StringComparer.OrdinalIgnoreCase);
+            var srcFks = source.ForeignKeys.ToDictionary(f => f.Name, StringComparer.OrdinalIgnoreCase);
+            var tgtFks = target.ForeignKeys.ToDictionary(f => f.Name, StringComparer.OrdinalIgnoreCase);
 
-            // Removed FK
-            foreach ( var s in sourceFks )
+            // ── Removed ──────────────────────────────────────────────────────
+            foreach ( var (name, srcFk) in srcFks )
             {
-                if ( !targetFks.ContainsKey(s.Key) )
+                if ( !tgtFks.ContainsKey(name) )
                 {
                     diffs.Add(new DiffItem
                     {
                         ObjectType = ObjectType.ForeignKey,
-                        ObjectName = s.Key,
+                        ObjectName = name,
                         ParentName = source.Name,
                         DiffType = DiffType.Removed,
-                        SourceDefinition = s.Value
+                        SourceDefinition = srcFk
                     });
                 }
             }
 
-            // Added FK
-            foreach ( var t in targetFks )
+            // ── Added ────────────────────────────────────────────────────────
+            foreach ( var (name, tgtFk) in tgtFks )
             {
-                if ( !sourceFks.ContainsKey(t.Key) )
+                if ( !srcFks.ContainsKey(name) )
                 {
                     diffs.Add(new DiffItem
                     {
                         ObjectType = ObjectType.ForeignKey,
-                        ObjectName = t.Key,
+                        ObjectName = name,
                         ParentName = source.Name,
                         DiffType = DiffType.Added,
-                        TargetDefinition = t.Value
+                        TargetDefinition = tgtFk
                     });
                 }
             }
 
-            // Modified FK
-            foreach ( var s in sourceFks )
+            // ── Modified ─────────────────────────────────────────────────────
+            foreach ( var (name, srcFk) in srcFks )
             {
-                if ( targetFks.TryGetValue(s.Key, out var targetFk) )
-                {
-                    var changes = GetChanges(s.Value, targetFk);
+                if ( !tgtFks.TryGetValue(name, out var tgtFk) )
+                    continue;
 
-                    if ( changes.Count > 0 )
+                var changes = GetChangedProperties(srcFk, tgtFk);
+                if ( changes.Count > 0 )
+                {
+                    diffs.Add(new DiffItem
                     {
-                        diffs.Add(new DiffItem
-                        {
-                            ObjectType = ObjectType.ForeignKey,
-                            ObjectName = s.Key,
-                            ParentName = source.Name,
-                            DiffType = DiffType.Modified,
-                            SourceDefinition = s.Value,
-                            TargetDefinition = targetFk,
-                            ChangedProperties = changes
-                        });
-                    }
+                        ObjectType = ObjectType.ForeignKey,
+                        ObjectName = name,
+                        ParentName = source.Name,
+                        DiffType = DiffType.Modified,
+                        SourceDefinition = srcFk,
+                        TargetDefinition = tgtFk,
+                        ChangedProperties = changes
+                    });
                 }
             }
 
             return diffs;
         }
 
-        private List<string> GetChanges ( ForeignKeyDefinition a, ForeignKeyDefinition b )
+        private static List<string> GetChangedProperties ( ForeignKeyDefinition a, ForeignKeyDefinition b )
         {
             var changes = new List<string>();
 
-            // Column mapping change
-            if ( !a.Columns.SequenceEqual(b.Columns) )
-                changes.Add($"Columns: {string.Join(",", a.Columns)} → {string.Join(",", b.Columns)}");
+            // Column mapping — order matters for composite FKs
+            if ( !a.Columns.SequenceEqual(b.Columns, StringComparer.OrdinalIgnoreCase) )
+                changes.Add($"Columns: [{string.Join(", ", a.Columns)}] → [{string.Join(", ", b.Columns)}]");
 
-            // Referenced table change
+            // Referenced table
             if ( !string.Equals(a.ReferencedTable, b.ReferencedTable, StringComparison.OrdinalIgnoreCase) )
                 changes.Add($"ReferencedTable: {a.ReferencedTable} → {b.ReferencedTable}");
 
-            // Referenced columns change
-            if ( !a.ReferencedColumns.SequenceEqual(b.ReferencedColumns) )
-                changes.Add($"ReferencedColumns: {string.Join(",", a.ReferencedColumns)} → {string.Join(",", b.ReferencedColumns)}");
+            // Referenced columns — order matters
+            if ( !a.ReferencedColumns.SequenceEqual(b.ReferencedColumns, StringComparer.OrdinalIgnoreCase) )
+                changes.Add($"ReferencedColumns: [{string.Join(", ", a.ReferencedColumns)}] → [{string.Join(", ", b.ReferencedColumns)}]");
 
-            // OnDelete rule
+            // Referential action rules
             if ( !string.Equals(a.OnDelete, b.OnDelete, StringComparison.OrdinalIgnoreCase) )
                 changes.Add($"OnDelete: {a.OnDelete} → {b.OnDelete}");
 
-            // OnUpdate rule
             if ( !string.Equals(a.OnUpdate, b.OnUpdate, StringComparison.OrdinalIgnoreCase) )
                 changes.Add($"OnUpdate: {a.OnUpdate} → {b.OnUpdate}");
 
